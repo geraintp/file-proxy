@@ -20,10 +20,6 @@ Key Features:
 
 == Installation ==
 
-This section describes how to install the plugin and get it working.
-
-e.g.
-
 1. Upload `file-proxy` to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
 1. Place `[file-proxy id='attachment_id']link text[/file-proxy]` or `[file-proxy id='attachment_id']` in your page or post
@@ -33,7 +29,7 @@ e.g.
 
 == Frequently Asked Questions ==
 
-= How do i find the attachment id? =
+= How do I find the attachment id? =
 
 1. Go to the Media Library and hover over the file you want to attach, at the end of the url in the status bar you will see `&attachment_id=xxx`
 1. the number at the end is the number you want.
