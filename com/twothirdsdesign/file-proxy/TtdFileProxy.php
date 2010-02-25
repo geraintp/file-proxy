@@ -36,7 +36,7 @@ class TtdFileProxy extends TtdPluginClass
 		
 		// Add admin menu interface
 		if( is_admin() ){
-			//include( GCPF_ADMIN.DS."adminController.php" );
+			//include( TTDFP_ADMIN.DS."adminController.php" );
 			//$adminCrtl = new GcpfAdminController( &$this );
 			//add_action('admin_menu', array(&$adminCrtl, 'adminMenus'));
 		}
@@ -50,13 +50,12 @@ class TtdFileProxy extends TtdPluginClass
 		add_shortcode('file-proxy', array(&$this, 'return_proxy_url'));
 		
 		// adds proxy rewrite rule & query_var
-		add_action('generate_rewrite_rules', array(&$this,'add_rewrite_rules'));
+		//add_action('generate_rewrite_rules', array(&$this,'add_rewrite_rules'));
 		add_filter('query_vars', array(&$this, 'query_vars'));
 		
 		// intercepts and acts on query_var file-proxy
-		add_action('init', array(&$this,'request_handler'), 999);		
-	
-		add_action('init', array(&$this,'flush_rules'));
+		add_action('init', array(&$this,'request_handler'), 999);
+		//add_action('init', array(&$this,'flush_rules'));
 	}
 	
 	/**
@@ -154,14 +153,20 @@ class TtdFileProxy extends TtdPluginClass
 	{	
 		global $wp_query;
 		
-		if ( isset( $_GET[ $this->get_option('url-key') ] )) {
+		$id = $_GET[ $this->get_option('url-key') ];
+		
+		if ( isset( $id )) {
+			
+			// Sanatize url var.
+			$id = intval( $id );
+			if( $id <= 0 ){ return; }
 			
 			if(!is_user_logged_in()){
 				auth_redirect();
 				exit;
 			}
 				
-			$this->return_file( $_GET[ $this->get_option('url-key') ] );
+			$this->return_file( $id );
 			exit;
 		}
 	}
@@ -173,12 +178,12 @@ class TtdFileProxy extends TtdPluginClass
 		// define absolute path to image folder
 		if ( ! defined( 'WP_CONTENT_DIR' ) )
 		      define( 'WP_CONTENT_DIR', ABSPATH . 'wp-content' );
+			  
 		
 		$upload_folder = WP_CONTENT_DIR.DS.'uploads'.DS ;
 		
-		$file_data = $wpdb->get_row( "SELECT * FROM {$wpdb->prefix}posts WHERE id={$id}" );
-		
-		$query = "SELECT meta_value FROM {$wpdb->prefix}postmeta WHERE post_id={$id} AND meta_key='_wp_attached_file'";
+		$file_data = $wpdb->get_row( $wpdb->prepare("SELECT * FROM {$wpdb->prefix}posts WHERE id=%d", $id));
+		$query     = $wpdb->prepare("SELECT meta_value FROM {$wpdb->prefix}postmeta WHERE post_id=%d AND meta_key='_wp_attached_file'", $id);
 		
 		$file_path = $upload_folder . $wpdb->get_var( $query );
 				
@@ -192,9 +197,9 @@ class TtdFileProxy extends TtdPluginClass
 	        	exit;
 	      	}
 		}else{
-			echo "404 - File not found";
+			return;
 		}	
-		exit;
+		return;
 	}
 	
 	
@@ -215,8 +220,8 @@ class TtdFileProxy extends TtdPluginClass
 		$link =  get_bloginfo('url') .'/index.php?'. $this->options->get_option('url-key') .'='. $id;
 		$title = empty($content) ? 'DEFAULT TITLE' : $content ;
 		
-		if( !is_user_logged_in() )
-			$title = $title . " - Login to download this file." . $_SERVER['REQUEST_URI'];
+		//if( !is_user_logged_in() )
+		//	$title = $title . " - Login to download this file.";
 		echo "<a href='{$link}' alt='{$alt}'>{$title}</a>";
 	}
 }

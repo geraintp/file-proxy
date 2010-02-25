@@ -4,7 +4,7 @@ Donate link: http://www.twothirdsdesign.co.uk/
 Tags: files, protection, retsrict access,
 Requires at least: 2.9.x
 Tested up to: 2.9.2
-Stable tag: 0.1
+Stable tag: 0.2
 
 File Proxy is a simple WordPress plug that lest you protect / restrict access to a specific embedded file.
 
@@ -12,10 +12,11 @@ File Proxy is a simple WordPress plug that lest you protect / restrict access to
 
 File Proxy is a simple WordPress plug that lest you protect / restrict access to a specific embedded file.  It lets you embed files from the upload directory into a post or page using a short code that restricts access to registered users.  guest users who click on the link are prompted to login before returning the file.
 
-Key Features
+Key Features:
+
 * The true file URL is never revealed preventing hot linking.
-* cherry pick which files you want to protect.
-* simple shortcode interface.
+* Cherry pick which files you want to protect.
+* Simple shortcode interface.
 
 == Installation ==
 
@@ -39,10 +40,16 @@ e.g.
 
 == Changelog ==
 
+= 0.2 =
+Adds some Variable sanitation
+
 = 0.1 =
 First Release
 
 == Upgrade Notice ==
+
+= 0.2 =
+Adds some Variable sanitation, and sql prep to harden plugin security
 
 = 0.1 =
 First Release

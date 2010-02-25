@@ -1,11 +1,11 @@
 <?php
 	/*
 	Plugin Name: File Proxy	
-	Version: 0.1
+	Version: 0.2
 	Description: File Proxy is a simple WordPress plug that lest you protect / restrict access to a specific embedded file.  It lets you embed files from the upload directory into a post or page using a short code that restricts access to registered users.  guest users who click on the link are prompted to login before returning the file.<code>[file-proxy id='attachment_id']link text[/file-proxy]</code>.
-	Author: Two Thirds Design Ltd
+	Author: Geraint Palmer
 	Author URI: http://www.twothirdsdesign.co.uk/
-	Plugin URI: http://labs.twothirdsdesign.co.uk/wordpress/plugins/ttd-file-proxy
+	Plugin URI: http://www.twothirdsdesign.co.uk/wordpress/plugin/2010/02/file-proxy/
 	*/
 	
 	/* Version check */
@@ -15,7 +15,7 @@
 	if ( version_compare( $wp_version , "2.8" , "<" ) ) exit ($exit_msg);
 
 	// Plugin Variables
-	define( 'TTDFP_VERSION', "0.1" );
+	define( 'TTDFP_VERSION', "0.2" );
 	
 	// Define URL
 	define( 'TTDFP_URL', trailingslashit( WP_PLUGIN_URL ) . basename( dirname(__FILE__) ) .'/' );   
