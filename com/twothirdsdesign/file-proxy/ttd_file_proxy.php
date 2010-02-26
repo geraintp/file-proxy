@@ -36,7 +36,7 @@ class TtdFileProxy extends TtdPluginClass
 		
 		// Add admin menu interface
 		if( is_admin() ){
-			include( TTDFP_ADMIN.DS."adminController.php" );
+			//include( TTDFP_ADMIN.DS."adminController.php" );
 			//$adminCrtl = new GcpfAdminController( &$this );
 			//add_action('admin_menu', array(&$adminCrtl, 'adminMenus'));
 		}
@@ -109,18 +109,18 @@ class TtdFileProxy extends TtdPluginClass
 		
 		$this->update_option("version", TTDPF_VERSION );
 		if( defined('WP_CONTENT_DIR') ){
-			if(!is_dir(WP_CONTENT_DIR.DS.'cache')){
-				mkdir(WP_CONTENT_DIR.DS.'cache');
+			if(!is_dir( WP_CONTENT_DIR.DS.'cache' )){
+				mkdir( WP_CONTENT_DIR.DS.'cache' );
 			}
-			if(!is_dir(WP_CONTENT_DIR.DS.'cache'.DS. $plugin_domain)){	
-				mkdir(WP_CONTENT_DIR.DS.'cache'.DS. $plugin_domain);
+			if(!is_dir( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain )){	
+				mkdir( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain );
 			}
-			if(!is_dir(WP_CONTENT_DIR.DS.'cache'.DS. $plugin_domain)){
+			if(!is_dir( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain )){
 				exit ("cache dir failure");
 			}
 		}
 		else
-			mkdir(TTDFP_DIR.DS.'cache');
+			mkdir( TTDFP_DIR.DS.'cache' );
 	}
 		
 	/**
@@ -135,10 +135,10 @@ class TtdFileProxy extends TtdPluginClass
 		if( (boolean)$this->get_option("uninstall") ){
 			delete_option($this->options_key);
 			
-			if(is_dir(WP_CONTENT_DIR.DS.'cache'.DS. $plugin_domain ))
-				$this->rmdirr(WP_CONTENT_DIR.DS.'cache'.DS. $plugin_domain );
-			if(is_dir(TTDFP_DIR.DS.'cache'))
-				$this->rmdirr(TTDFP_DIR.DS.'cache');
+			if( is_dir( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain ))
+				$this->rmdirr(WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain );
+			if( is_dir( TTDFP_DIR.DS.'cache' ))
+				$this->rmdirr( TTDFP_DIR.DS.'cache' );
 		}
 	}
 	
@@ -216,13 +216,20 @@ class TtdFileProxy extends TtdPluginClass
 	 **/
 	public function return_proxy_url($atts, $content = '')
 	{	
+		global $wpdb;
+		
 		extract(shortcode_atts(array(
 				'id' => '',
 				'alt' => 'Some Really Great File',
 			), $atts));
+			
+		$id = intval($id);
+		$file_name = $wpdb->get_var( $wpdb->prepare( "SELECT guid FROM {$wpdb->prefix}posts WHERE id=%d", $id ));
+		$file_name = $file_name = explode( DS , $file_name );
+		$file_name = $file_name[( count($file_name)-1 )];
 		
 		$link =  get_bloginfo('url') .'/index.php?'. $this->options->get_option('url-key') .'='. $id;
-		$title = empty($content) ? 'DEFAULT TITLE' : $content ;
+		$title = empty($content) ? $file_name : $content ;
 		
 		//if( !is_user_logged_in() )
 		//	$title = $title . " - Login to download this file.";

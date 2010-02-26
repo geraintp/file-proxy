@@ -25,7 +25,7 @@ Key Features:
 1. Place `[file-proxy id='attachment_id']link text[/file-proxy]` or `[file-proxy id='attachment_id']` in your page or post
 
 == Screenshots ==
-1. Screen shots to follow
+none
 
 == Frequently Asked Questions ==
 
@@ -36,6 +36,9 @@ Key Features:
 
 == Changelog ==
 
+= 0.3 =
+Corrects Default link text, to file name.
+
 = 0.2 =
 Adds some Variable sanitation
 
@@ -43,6 +46,8 @@ Adds some Variable sanitation
 First Release
 
 == Upgrade Notice ==
+= 0.3 =
+Corrects Default link text, to link file name.
 
 = 0.2 =
 Adds some Variable sanitation, and sql prep to harden plugin security

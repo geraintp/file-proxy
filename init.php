@@ -47,7 +47,7 @@
 		if( !class_exists('GcpOptions') )
 			require_once( TTDFP_CORE.DS.'gcp_options.php' );
 		
-		require_once( TTDFP_LIB.DS.'file-proxy'.DS.'TtdFileProxy.php' );
+		require_once( TTDFP_LIB.DS.'file-proxy'.DS.'ttd_file_proxy.php' );
 		
 		// Create Plugin Instance
 		$main = new TtdFileProxy();
