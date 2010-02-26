@@ -36,7 +36,7 @@ class TtdFileProxy extends TtdPluginClass
 		
 		// Add admin menu interface
 		if( is_admin() ){
-			//include( TTDFP_ADMIN.DS."adminController.php" );
+			include( TTDFP_ADMIN.DS."adminController.php" );
 			//$adminCrtl = new GcpfAdminController( &$this );
 			//add_action('admin_menu', array(&$adminCrtl, 'adminMenus'));
 		}
@@ -50,7 +50,7 @@ class TtdFileProxy extends TtdPluginClass
 		add_shortcode('file-proxy', array(&$this, 'return_proxy_url'));
 		
 		// adds proxy rewrite rule & query_var
-		//add_action('generate_rewrite_rules', array(&$this,'add_rewrite_rules'));
+		add_action('generate_rewrite_rules', array(&$this,'add_rewrite_rules'));
 		add_filter('query_vars', array(&$this, 'query_vars'));
 		
 		// intercepts and acts on query_var file-proxy
@@ -182,14 +182,18 @@ class TtdFileProxy extends TtdPluginClass
 		
 		$upload_folder = WP_CONTENT_DIR.DS.'uploads'.DS ;
 		
-		$file_data = $wpdb->get_row( $wpdb->prepare("SELECT * FROM {$wpdb->prefix}posts WHERE id=%d", $id));
-		$query     = $wpdb->prepare("SELECT meta_value FROM {$wpdb->prefix}postmeta WHERE post_id=%d AND meta_key='_wp_attached_file'", $id);
+		$file_data     = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}posts WHERE id=%d", $id ));
+		$file_location = $wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM {$wpdb->prefix}postmeta WHERE post_id=%d AND meta_key='_wp_attached_file'", $id ));
 		
-		$file_path = $upload_folder . $wpdb->get_var( $query );
+		$file_path = $upload_folder . $file_location;
+		
+		$file_name = explode( DS , $file_location );
+		$file_name = $file_name[( count($file_name)-1 )];
 				
 		if ( file_exists( $file_path ) && is_readable( $file_path ) && is_file( $file_path ) ) {
 			header( 'Content-type: '.$file_data->post_mime_type );
-			header( "Content-Disposition: attachment; filename=\"" . $file_data->post_name .'.'.substr( $file_data->post_mime_type, -3 )."\"");
+			header( "HTTP/1.0 200 OK" );
+			header( "Content-Disposition: attachment; filename=\"" . $file_name ."\"");
 		    header( 'Content-length: '. (string)(filesize( $file_path )) );
 			$file = @ fopen($file_path, 'rb');
 		    if ( $file ) {

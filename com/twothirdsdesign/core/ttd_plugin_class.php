@@ -1,6 +1,13 @@
 <?php
+/**
+ * TtdPluginClass
+ *
+ * @author		Geraint Palmer
+ * @version 	1.0.0 	   
+ */
 	class TtdPluginClass
 	{
+		const VERSION = '1.0.0';
 		// variable
 		protected $options;
 

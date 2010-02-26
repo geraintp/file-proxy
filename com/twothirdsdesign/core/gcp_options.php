@@ -1,12 +1,16 @@
 <?php
 /**
-* Options Manager Class
-*/
+ * Options Manager Class
+ *
+ * @author		Geraint Palmer
+ * @version 	1.0.0 	   
+ */
 class GcpOptions
 {
+	const VERSION = '1.0.0';
 	protected $options_key = 'ttd_plugin_options';
 	protected $_options = array(
-		'day_format'			=> 'F jS',
+		'key'	=> 'value',
 	);
 	
 	function __construct($optionsKey, $defaultArray)

@@ -1,9 +1,24 @@
 <?php
 /**
-* 
-*/
-class DataModel
+ * Pretend this is a file
+ *
+ * @package 	com.twothirdsdesign
+ * @subpackage	core
+ * @author		Geraint Palmer
+ * 
+ */
+/**
+ * DataModel class is an abstract data model for wordpress table/data
+ *
+ * @package		com.twothirdsdesign.core
+ * @version 	1.0.0
+ * @author      Geraint Palmer <gaz@twothirdsdesign.co.uk>
+ * @copyright   Two Thirds Design Ltd 2010
+ * @abstract	
+ */
+abstract class DataModel
 {
+	    const VERSION = '1.0.0';
 		protected static $table_name;
 		protected static $db_exclude = array();
 
