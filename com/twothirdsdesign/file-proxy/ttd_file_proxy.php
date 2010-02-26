@@ -15,9 +15,10 @@ class TtdFileProxy extends TtdPluginClass
 	protected $rules;
 
 	protected $_options = array(
-		'key-length'			=> 7,
-		'uninstall'				=> true,
-		'url-key'				=> 'file',
+		'key-length'	=> 7,
+		'uninstall'		=> true,
+		'url-key'		=> 'file',
+		'cache'			=> 'off',
 	);
 	
 	function __construct()
@@ -108,19 +109,27 @@ class TtdFileProxy extends TtdPluginClass
 		$this->flush_rules();
 		
 		$this->update_option("version", TTDPF_VERSION );
+		
 		if( defined('WP_CONTENT_DIR') ){
-			if(!is_dir( WP_CONTENT_DIR.DS.'cache' )){
+			if(!is_dir( WP_CONTENT_DIR.DS.'cache' ) && is_writable( WP_CONTENT_DIR )){
 				mkdir( WP_CONTENT_DIR.DS.'cache' );
 			}
-			if(!is_dir( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain )){	
+			if(!is_dir( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain ) && is_writable( WP_CONTENT_DIR.DS.'cache' )){	
 				mkdir( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain );
 			}
 			if(!is_dir( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain )){
-				exit ("cache dir failure");
+				$this->update_option('cache', 'disabled');
 			}
 		}
-		else
-			mkdir( TTDFP_DIR.DS.'cache' );
+		else if(!is_dir( TTDFP_DIR.DS.'cache') && is_writable( TTDFP_DIR ))
+		{
+			mkdir( TTDFP_DIR.DS.'cache' );	
+			if(is_dir( TTDFP_DIR.DS.'cache') && is_writable( TTDFP_DIR )){
+				$this->update_option('cache', 'off');
+			}
+		}else{
+			$this->update_option('cache', 'disabled');
+		}
 	}
 		
 	/**
@@ -135,9 +144,9 @@ class TtdFileProxy extends TtdPluginClass
 		if( (boolean)$this->get_option("uninstall") ){
 			delete_option($this->options_key);
 			
-			if( is_dir( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain ))
+			if( is_dir( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain ) && is_writable( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain ) )
 				$this->rmdirr(WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain );
-			if( is_dir( TTDFP_DIR.DS.'cache' ))
+			if( is_dir( TTDFP_DIR.DS.'cache' ) && is_writable( TTDFP_DIR.DS. $this->plugin_domain ) )
 				$this->rmdirr( TTDFP_DIR.DS.'cache' );
 		}
 	}
