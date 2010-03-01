@@ -36,11 +36,8 @@ class TtdFileProxy extends TtdPluginClass
 			$this->handle_load_domain();
 		
 		// Add admin menu interface
-		if( is_admin() ){
-			//include( TTDFP_ADMIN.DS."adminController.php" );
-			//$adminCrtl = new GcpfAdminController( &$this );
-			//add_action('admin_menu', array(&$adminCrtl, 'adminMenus'));
-		}
+		$this->admin();
+
 		//add_action('template_redirect', array(&$this,'uri_detect'));
 					
 		// add activation hooks
@@ -57,6 +54,31 @@ class TtdFileProxy extends TtdPluginClass
 		// intercepts and acts on query_var file-proxy
 		add_action('init', array(&$this,'request_handler'), 999);
 		//add_action('init', array(&$this,'flush_rules'));
+	}
+	
+	function admin(){
+		if( is_admin() ){
+			require_once( TTDFP_ADMIN.DS.'admin.php' );
+			$ttd_file_proxy_admin = new TtdFileProxyAdmin( &$this );
+			
+			//require_once( TTDFP_ADMIN.DS.'meta-box.php' );
+			//require_once( TTDFP_ADMIN.DS.'settings-page.php' );
+			//include( TTDFP_ADMIN.DS."adminController.php" );
+			//$adminCrtl = new GcpfAdminController( &$this );
+			//add_action('admin_menu', array(&$adminCrtl, 'adminMenus'));
+		}
+	}
+	
+	
+	/**
+	 * exposes the text domain contant
+	 *
+	 * @return String
+	 * @author Geraint Palmer
+	 * @since 0.5
+	 **/
+	function get_domain(){
+		return $this->domain;
 	}
 	
 	/**
