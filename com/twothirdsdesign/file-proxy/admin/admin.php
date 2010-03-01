@@ -128,7 +128,7 @@ class TtdFileProxyAdmin
 		<tr>
 			<th><label for="uninstall"><?php _e( 'Unistall:', $this->domain ); ?></label></th>
 			<td>
-            	<div class="on_off">
+            	<div class="on_off danger">
 					<input id="uninstall" name="uninstall" type="checkbox" <?php if((boolean)$this->m->get_option("uninstall")) echo "checked=checked" ?> value="true" />				
 				</div>
                 <div class="helptext">
@@ -139,15 +139,20 @@ class TtdFileProxyAdmin
 		<tr>
 			<th><label for="url-key"><?php _e( 'Url Key:', $this->domain ); ?></label></th>
 			<td>
-				<input id="url-key" name="url-key" type="text" value="<?php echo $this->m->get_option('url-key'); ?>" size="30" /><br />
-				<?php _e( 'If you want to change the url your file are referenced through, ie http://www.example.com/?%url-key%=xxx, you can enter it here.', $this->domain ); ?>
+				<span id="sample-url-key"><?php bloginfo('url') ?>/<input id="url-key-feild" name="url-key" value="<?php echo $this->m->get_option('url-key') ?>" type="text"><span id="editable-post-name" class="hide-if-no-js" title="Click to edit this part of the permalink"><?php echo $this->m->get_option('url-key') ?></span>/xxx</span> 
+				
+				<span id="edit-slug-buttons"><a href="#post_name" class="edit-slug button hide-if-no-js" onclick="editUrlKey(); return false;">edit</a></span>
+				<br/>
+				<label for="url-key"><?php _e( 'If you want to change the url your file are referenced through, ie http://www.example.com/?%url-key%=xxx, you can enter it here.', $this->domain ); ?></label-->
 			</td>
 		</tr>
         <?php if($this->m->get_option('cache') != "disabled"): ?>
 		<tr>
 			<th><label for="cache"><?php _e( 'Caching:', $this->domain ); ?></label></th>
 			<td>
-				<input id="cache" name="cache" type="checkbox" <?php if ( $this->m->get_option('cache') == "on" ) echo 'checked="checked"'; ?> value="true" /> 
+				<div class="on_off">
+					<input id="cache" name="cache" type="checkbox" <?php if ( $this->m->get_option('cache') == "on" ) echo 'checked="checked"'; ?> value="true" /> 
+				</div>
 				<label for="cache"><?php _e( 'Are you using an <acronym title="Search Engine Optimization">SEO</acronym> plugin? Select this to disable the theme\'s meta and indexing features.', $this->domain ); ?></label>
 			</td>
 		</tr>
@@ -157,7 +162,17 @@ class TtdFileProxyAdmin
 			<td>	<label for="cache"><?php _e( 'Error: Caching Disabled, can not write to file system.', $this->domain ); ?></label></td>
 		</tr>	
         <?php endif; ?>
-
+		<script type="text/javascript"> 
+           jQuery(document).ready( function() {
+				jQuery('.on_off :checkbox').iphoneStyle();
+				jQuery('#url-key-feild').hide();
+			});
+			function editUrlKey(){
+				jQuery('#url-key-feild').toggle();
+				jQuery('#editable-post-name').toggle();
+			}
+			
+		 </script>
 	</table><!-- .form-table --><?php
 	}
 	
