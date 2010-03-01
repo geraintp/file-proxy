@@ -7,7 +7,7 @@
  */
 class GcpOptions
 {
-	const VERSION = '1.0.1';
+	const VERSION = '1.0.2';
 	protected $options_key = 'ttd_plugin_options';
 	protected $_options = array(
 		'key'	=> 'value',
@@ -25,7 +25,7 @@ class GcpOptions
 		if (!$this->_optioncache)
 		{
 			// tries to create a cache from wordpress DB options table.// uses plugin preset options not in db
-			$this->_optioncache =  get_option( $this->options_key );
+			$this->_optioncache =  unserialize( get_option( $this->options_key, NULL ));
 			if (!$this->_optioncache) $this->_optioncache = $this->_options;
 		}
 	}
