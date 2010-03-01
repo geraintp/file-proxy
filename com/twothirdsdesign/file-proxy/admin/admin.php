@@ -87,6 +87,8 @@ class TtdFileProxyAdmin
 	 * @since 0.5
 	 */
 	function render_settings_page() { ?>
+    	<link rel="stylesheet" href="<?php echo  TTDFP_URL .'assets/css/iphone-switch.css' ?>" type="text/css" media="screen" charset="utf-8" />
+		<script src='<?php echo TTDFP_URL .'assets/js/iphone-style-checkboxes.js' ?>' type='text/javascript'></script>
 		<div class="wrap">
 		<div id="icon-options-general" class="icon32"><br /></div> 
 		<h2><?php  _e( 'File Proxy Settings', $this->domain ); ?> <small>(<a href="<?php $this->settings_link(); ?>&amp;opt=reset"><?php _e('Reset', $this->domain ); ?></a>)</small></h2>
@@ -102,10 +104,9 @@ class TtdFileProxyAdmin
 				<?php wp_nonce_field( 'meta-box-order', 'meta-box-order-nonce', false ); ?>
 
 				<div class="metabox-holder">
-					<div class="post-box-container column-1 normal"><?php do_meta_boxes( $hybrid->settings_page, 'normal', $theme_data ); ?></div>
+					<div class="post-box-container column-1 normal"><?php $this->hybrid_general_settings_meta_box();//do_meta_boxes( $hybrid->settings_page, 'normal', $theme_data ); ?></div>
 					<div class="post-box-container column-2 advanced"><?php do_meta_boxes( $hybrid->settings_page, 'advanced', $theme_data ); ?></div>
 					<div class="post-box-container column-3 side"><?php do_meta_boxes( $hybrid->settings_page, 'side', $theme_data ); ?></div>
-                    <?php echo $this->m->get_option("cache", 'uho spaggetti ohhs'); ?>
 				</div>
 
 				<p class="submit" style="clear: both;">
@@ -118,6 +119,46 @@ class TtdFileProxyAdmin
 		</div><!-- #poststuff -->
 
 	</div><!-- .wrap --> <?php
+	}
+	
+	function hybrid_general_settings_meta_box() { ?>
+
+	<table class="form-table">
+
+		<tr>
+			<th><label for="uninstall"><?php _e( 'Unistall:', $this->domain ); ?></label></th>
+			<td>
+            	<div class="on_off">
+					<input id="uninstall" name="uninstall" type="checkbox" <?php if((boolean)$this->m->get_option("uninstall")) echo "checked=checked" ?> value="true" />				
+				</div>
+                <div class="helptext">
+                    <label for="uninstall"><?php _e( "Turning this setting \"<strong><em>ON</em></strong>\" will wipe all information and settings this plugin stores in WordPress' database <strong>next time</strong> the plugin is deactivated.", $this->domain ); ?></label> 
+                </div>
+			</td>
+		</tr>
+		<tr>
+			<th><label for="url-key"><?php _e( 'Url Key:', $this->domain ); ?></label></th>
+			<td>
+				<input id="url-key" name="url-key" type="text" value="<?php echo $this->m->get_option('url-key'); ?>" size="30" /><br />
+				<?php _e( 'If you want to change the url your file are referenced through, ie http://www.example.com/?%url-key%=xxx, you can enter it here.', $this->domain ); ?>
+			</td>
+		</tr>
+        <?php if($this->m->get_option('cache') != "disabled"): ?>
+		<tr>
+			<th><label for="cache"><?php _e( 'Caching:', $this->domain ); ?></label></th>
+			<td>
+				<input id="cache" name="cache" type="checkbox" <?php if ( $this->m->get_option('cache') == "on" ) echo 'checked="checked"'; ?> value="true" /> 
+				<label for="cache"><?php _e( 'Are you using an <acronym title="Search Engine Optimization">SEO</acronym> plugin? Select this to disable the theme\'s meta and indexing features.', $this->domain ); ?></label>
+			</td>
+		</tr>
+        <?php else : ?>
+        <tr>
+			<th><label for="cache"><?php _e( 'Caching:', $this->domain ); ?></label></th>
+			<td>	<label for="cache"><?php _e( 'Error: Caching Disabled, can not write to file system.', $this->domain ); ?></label></td>
+		</tr>	
+        <?php endif; ?>
+
+	</table><!-- .form-table --><?php
 	}
 	
 	function settings_header(){
