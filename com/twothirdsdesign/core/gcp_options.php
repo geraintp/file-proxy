@@ -3,7 +3,7 @@
  * Options Manager Class
  *
  * @author		Geraint Palmer
- * @version 	1.0.1 	   
+ * @version 	1.0.2 	   
  */
 class GcpOptions
 {
@@ -25,7 +25,7 @@ class GcpOptions
 		if (!$this->_optioncache)
 		{
 			// tries to create a cache from wordpress DB options table.// uses plugin preset options not in db
-			$this->_optioncache =  unserialize( get_option( $this->options_key, false ));
+			$this->_optioncache = unserialize( get_option( $this->options_key , false ));
 			if (!$this->_optioncache) $this->_optioncache = $this->_options;
 		}
 	}

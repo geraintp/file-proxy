@@ -19,6 +19,7 @@ class TtdFileProxy extends TtdPluginClass
 		'uninstall'		=> true,
 		'url-key'		=> 'file',
 		'cache'			=> 'off',
+		'permalinks'	=> 'off',
 	);
 	
 	function __construct()
@@ -256,15 +257,38 @@ class TtdFileProxy extends TtdPluginClass
 			
 		$id = intval($id);
 		$file_name = $wpdb->get_var( $wpdb->prepare( "SELECT guid FROM {$wpdb->prefix}posts WHERE id=%d", $id ));
-		$file_name = $file_name = explode( DS , $file_name );
+		$file_name = explode( DS , $file_name );
 		$file_name = $file_name[( count($file_name)-1 )];
+	
 		
-		$link =  get_bloginfo('url') .'/index.php?'. $this->options->get_option('url-key') .'='. $id;
 		$title = empty($content) ? $file_name : $content ;
 		
 		//if( !is_user_logged_in() )
 		//	$title = $title . " - Login to download this file.";
 		echo "<a href='{$link}' alt='{$alt}'>{$title}</a>";
+	}
+	
+	/**
+	 * Constructs the correct Download URI
+	 *
+	 * @return String
+	 * @author Geraint Palmer
+	 * @since 0.5
+	 **/
+	private function generate_url($id)
+	{
+		global $wp_rewrite;
+		
+		$link =  get_bloginfo('url') .'/index.php?'. $this->options->get_option('url-key') .'='. $id;
+		
+		if ( $this->get_option('permalink') == 'on' ) 
+		{	
+			if( $wp_rewrite->using_permalinks() )
+				$link =  get_bloginfo('url') .'/'. $this->get_option('url-key') .'/'. $id ."/";
+			else if( $wp_rewite->using_index_permalinks() )
+				$link =  get_bloginfo('url') .'/index.php/'. $this->get_option('url-key') .'/'. $id ."/";
+		}
+		return $link;
 	}
 }
 ?>
