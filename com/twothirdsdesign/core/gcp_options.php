@@ -3,11 +3,11 @@
  * Options Manager Class
  *
  * @author		Geraint Palmer
- * @version 	1.0.2 	   
+ * @version 	1.0.3 	   
  */
 class GcpOptions
 {
-	const VERSION = '1.0.2';
+	const VERSION = '1.0.3';
 	protected $options_key = 'ttd_plugin_options';
 	protected $_options = array(
 		'key'	=> 'value',
@@ -26,10 +26,18 @@ class GcpOptions
 		{
 			// tries to create a cache from wordpress DB options table.// uses plugin preset options not in db
 			$this->_optioncache = unserialize( get_option( $this->options_key , false ));
-			if (!$this->_optioncache) $this->_optioncache = $this->_options;
+			if (!$this->_optioncache) 
+				$this->_optioncache = $this->_options;
 		}
 	}
 	
+	/**
+	 * Clears the option cache
+	 */
+	public function flush_options()
+	{
+		unset($this->_optioncache);
+	}
 	
 	/**
 	 * Fetches the value of an option. Returns `null` if the option is not set.

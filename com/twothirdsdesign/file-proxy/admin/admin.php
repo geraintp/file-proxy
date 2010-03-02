@@ -161,8 +161,13 @@ function editUrlKey(){
 		if($user_level > 9){
 			if( "Y" == esc_attr( $_POST['ttd_file_proxy_submit_hidden'] )){
 					//echo "<pre>"; print_r( $_POST ); echo "</pre>";
-					$this->m->update_option( "permalinks", isset( $_POST[ 'permalinks' ] ) ? 'on' : 'off' );
-					$this->m->update_option( "cache", isset( $_POST[ 'cache' ] ) ? 'on' : 'off' );
+					
+					if( $this->m->get_option( "permalinks" != "disabled" ) )
+						$this->m->update_option( "permalinks", isset( $_POST[ 'permalinks' ] ) ? 'on' : 'off' );
+	
+					if( $this->m->get_option( "cache" != "disabled" ) )
+						$this->m->update_option( "cache", isset( $_POST[ 'cache' ] ) ? 'on' : 'off' );
+					
 					$this->m->update_option( "uninstall", isset( $_POST[ 'uninstall' ] ) ? true : false );
 					$this->m->update_option( "url-key", esc_attr( $_POST['url-key']) );
 					
@@ -170,6 +175,8 @@ function editUrlKey(){
 			}
 			else if( $_GET['opt'] == "reset" ){
 				delete_option( $this->m->get_options_key() );
+				$this->m->flush_options();
+				$this->m->update_option("version", TTDPF_VERSION);
 				wp_redirect( $this->get_settings_link() );
 			}
 		}
@@ -236,7 +243,7 @@ function editUrlKey(){
 			</tr>
             <tr>
 				<th><?php _e( 'Version:', $this->domain ); ?></th>
-				<td><?php echo TTDPF_VERSION; ?></td>
+				<td><?php echo $this->m->get_option("version", 0 );?></td>
 			</tr>
 		</table><!-- .form-table --><?php
 	}
@@ -258,7 +265,7 @@ function editUrlKey(){
 	?>
 
 	<table class="form-table">
-
+		<?php if($this->m->get_option('permalinks') != "disabled"): ?>
 		<tr>
 			<th><label for="permalinks"><?php _e( 'Use Permalinks:', $this->domain ); ?></label></th>
 			<td>
@@ -274,6 +281,7 @@ function editUrlKey(){
 				<?php endif; ?>
 			</td>
 		</tr>
+       	<?php endif; ?>
 		<tr>
 			<th><label for="url-key"><?php _e( 'Url Key:', $this->domain ); ?></label></th>
 			<td>
@@ -284,7 +292,7 @@ function editUrlKey(){
 				<label for="url-key"><?php printf( __("Change the url your file are referenced through, ie %surl-key%s", $this->domain ), $url[0], $url[1] ); ?></label>
 			</td>
 		</tr>
-        
+        <?php if($this->m->get_option('cache') != "disabled"): ?>
 		<tr>
 			<th><label for="cache"><?php _e( 'Caching:', $this->domain ); ?></label></th>
 			<td>
@@ -298,6 +306,7 @@ function editUrlKey(){
          		<?php endif; ?>
 			</td>
 		</tr>
+        <?php endif; ?>
         <tr>
 			<th><label for="uninstall"><?php _e( 'Uninstall:', $this->domain ); ?></label></th>
 			<td>

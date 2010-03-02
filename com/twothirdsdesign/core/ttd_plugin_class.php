@@ -3,11 +3,11 @@
  * TtdPluginClass
  *
  * @author		Geraint Palmer
- * @version 	1.0.0 	   
+ * @version 	1.0.1 	   
  */
 	class TtdPluginClass
 	{
-		const VERSION = '1.0.0';
+		const VERSION = '1.0.1';
 		// variable
 		protected $options;
 
@@ -87,6 +87,14 @@
 		public function add_option($option, $value)
 		{
 			$this->options->add_option($option, $value);
+		}
+		
+		/**
+		 * Clears the option cache
+		 */
+		public function flush_options()
+		{
+			$this->options->flush_options();
 		}
 		
 		/**

@@ -18,8 +18,8 @@ class TtdFileProxy extends TtdPluginClass
 		'key-length'	=> 7,
 		'uninstall'		=> true,
 		'url-key'		=> 'file',
-		'cache'			=> 'off',
-		'permalinks'	=> 'off',
+		'cache'			=> 'disabled',
+		'permalinks'	=> 'disabled',
 	);
 	
 	function __construct()
@@ -136,9 +136,30 @@ class TtdFileProxy extends TtdPluginClass
 	public function activate()
 	{
 		$this->flush_rules();
-		
-		$this->update_option("version", TTDPF_VERSION );
-		
+		$this->install();		
+	}
+	
+	public function install(){
+		switch ( $this->get_option("version", "0") )
+		{
+			case '0.1':
+			case '0.2':
+			case '0.3':
+			case '0.4':
+				// Clears options for previous version
+				delete_option( $this->options_key );
+				break;
+			default:
+				break;
+		}
+		if( $this->get_option("cache") != "disabled" )
+			$this->build_cache_dir();
+			
+		$this->update_option("version", TTDFP_VERSION );
+	}
+	
+	public function build_cache_dir()
+	{
 		if( defined('WP_CONTENT_DIR') ){
 			if(!is_dir( WP_CONTENT_DIR.DS.'cache' ) && is_writable( WP_CONTENT_DIR )){
 				mkdir( WP_CONTENT_DIR.DS.'cache' );
