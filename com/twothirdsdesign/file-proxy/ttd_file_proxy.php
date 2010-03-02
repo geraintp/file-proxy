@@ -44,6 +44,7 @@ class TtdFileProxy extends TtdPluginClass
 		// add activation hooks
 		register_activation_hook   ( TTDFP_PLUGIN_FILE , array(&$this, 'activate'  ));
 		register_deactivation_hook ( TTDFP_PLUGIN_FILE , array(&$this, 'deactivate'));
+		register_uninstall_hook	   ( TTDFP_PLUGIN_FILE , array(&$this, 'uninstall'));
 		
 		// shortcodes
 		add_shortcode('file-proxy', array(&$this, 'return_proxy_url'));
@@ -61,13 +62,18 @@ class TtdFileProxy extends TtdPluginClass
 		if( is_admin() ){
 			require_once( TTDFP_ADMIN.DS.'admin.php' );
 			$ttd_file_proxy_admin = new TtdFileProxyAdmin( &$this );
-			
-			//require_once( TTDFP_ADMIN.DS.'meta-box.php' );
-			//require_once( TTDFP_ADMIN.DS.'settings-page.php' );
-			//include( TTDFP_ADMIN.DS."adminController.php" );
-			//$adminCrtl = new GcpfAdminController( &$this );
-			//add_action('admin_menu', array(&$adminCrtl, 'adminMenus'));
 		}
+	}
+	
+	/**
+	 * exposes the text options key constant
+	 *
+	 * @return String
+	 * @author Geraint Palmer
+	 * @since 0.5
+	 **/
+	function get_options_key(){
+		return $this->options_key;
 	}
 	
 	
@@ -154,7 +160,20 @@ class TtdFileProxy extends TtdPluginClass
 			$this->update_option('cache', 'disabled');
 		}
 	}
-		
+	
+
+	
+	public function uninstall(){
+		if( (boolean)$this->get_option("uninstall") ){
+			delete_option($this->options_key);
+			
+			if( is_dir( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain ) && is_writable( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain ) )
+				$this->rmdirr(WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain );
+			if( is_dir( TTDFP_DIR.DS.'cache' ) && is_writable( TTDFP_DIR.DS. $this->plugin_domain ) )
+				$this->rmdirr( TTDFP_DIR.DS.'cache' );
+		}	
+	}
+	
 	/**
 	 * deactivate function/hook cleans up after the plugin
 	 *
@@ -163,16 +182,7 @@ class TtdFileProxy extends TtdPluginClass
 	 * @since 0.1
 	 **/
 	public function deactivate()
-	{
-		if( (boolean)$this->get_option("uninstall") ){
-			delete_option($this->options_key);
-			
-			if( is_dir( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain ) && is_writable( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain ) )
-				$this->rmdirr(WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain );
-			if( is_dir( TTDFP_DIR.DS.'cache' ) && is_writable( TTDFP_DIR.DS. $this->plugin_domain ) )
-				$this->rmdirr( TTDFP_DIR.DS.'cache' );
-		}
-	}
+	{ }
 	
 	/**
 	 * Intercepts file request and indexes and authenticates before returning file
@@ -262,6 +272,7 @@ class TtdFileProxy extends TtdPluginClass
 	
 		
 		$title = empty($content) ? $file_name : $content ;
+		$link = $this->generate_url($id);
 		
 		//if( !is_user_logged_in() )
 		//	$title = $title . " - Login to download this file.";
@@ -275,13 +286,13 @@ class TtdFileProxy extends TtdPluginClass
 	 * @author Geraint Palmer
 	 * @since 0.5
 	 **/
-	private function generate_url($id)
+	public function generate_url($id)
 	{
 		global $wp_rewrite;
 		
 		$link =  get_bloginfo('url') .'/index.php?'. $this->options->get_option('url-key') .'='. $id;
 		
-		if ( $this->get_option('permalink') == 'on' ) 
+		if ( $this->get_option('permalinks') == 'on' ) 
 		{	
 			if( $wp_rewrite->using_permalinks() )
 				$link =  get_bloginfo('url') .'/'. $this->get_option('url-key') .'/'. $id ."/";
