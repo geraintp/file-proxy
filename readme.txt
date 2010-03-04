@@ -35,19 +35,34 @@ none
 1. the number at the end is the number you want.
 
 == Changelog ==
+
+
+= 0.5 =
+* Added admin options panel
+* Added file proxy link button to media uploader.
+
 = 0.4 =
+
 minor bug fix
 
+
 = 0.3 =
+
 Uses filename when link text is not specified. i.e. `[file-proxy id='attachment_id']`
 
 = 0.2 =
 Adds some Variable sanitation
 
 == Upgrade Notice ==
+
+= 0.5 =
+New features, Admin options, link button, direct in media manager.
 = 0.4 =
+
 minor bug fix
+
 = 0.3 =
+
 Default link text replaced by filename.
 = 0.2 =
 Adds some Variable sanitation, and sql prep to harden plugin security
