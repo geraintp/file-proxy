@@ -47,7 +47,8 @@ class TtdFileProxy extends TtdPluginClass
 		register_uninstall_hook	   ( TTDFP_PLUGIN_FILE , array(&$this, 'uninstall'));
 		
 		// shortcodes
-		add_shortcode('file-proxy', array(&$this, 'return_proxy_url'));
+		add_shortcode('file-proxy', array(&$this, 'return_proxy_link'));
+		add_shortcode('file-proxy-url', array(&$this, 'return_proxy_url'));
 		
 		// adds proxy rewrite rule & query_var
 		add_action('generate_rewrite_rules', array(&$this,'add_rewrite_rules'));
@@ -277,13 +278,14 @@ class TtdFileProxy extends TtdPluginClass
 	 * @author Geraint Palmer
 	 * @since 0.1
 	 **/
-	public function return_proxy_url($atts, $content = '')
+	public function return_proxy_link($atts, $content = '')
 	{	
 		global $wpdb;
 		
 		extract(shortcode_atts(array(
-				'id' => '',
-				'alt' => 'Some Really Great File',
+				'id' => '0',
+				'alt' => '',
+				'type' => 'link',
 			), $atts));
 			
 		$id = intval($id);
@@ -297,8 +299,28 @@ class TtdFileProxy extends TtdPluginClass
 		
 		//if( !is_user_logged_in() )
 		//	$title = $title . " - Login to download this file.";
-		echo "<a href='{$link}' alt='{$alt}'>{$title}</a>";
+		switch( $type )
+		{	
+			case 'url':
+				echo $link;
+				break;
+				
+			case 'link':
+			default:
+				echo "<a href='{$link}' alt='{$alt}'>{$title}</a>";
+				break;
+		}
 	}
+	
+	public function return_proxy_url($atts, $content = '')
+	{	
+		global $wpdb;
+		$id = intval($content);
+		
+		$link = $this->generate_url($id);
+		echo $link;
+	}
+		
 	
 	/**
 	 * Constructs the correct Download URI
