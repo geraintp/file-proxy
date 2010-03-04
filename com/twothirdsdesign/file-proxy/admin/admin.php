@@ -38,7 +38,7 @@ class TtdFileProxyAdmin
 	}
 	
 	function upload_form_filter( $form_fields, $post ){
-		$link = "[file-proxy-url]{$post->ID}[/file-proxy-url]";
+		$link = "[ttd-fp-url]{$post->ID}[/ttd-fp-url]";
 		$form_fields['url']['html'] = $form_fields['url']['html'] . "<button type='button' class='button urlfileproxy' title='" . esc_attr($link) . "'>" . __( 'File Proxy', $this->domain ) . "</button>";
 		return $form_fields;
 	}

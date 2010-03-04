@@ -48,7 +48,7 @@ class TtdFileProxy extends TtdPluginClass
 		
 		// shortcodes
 		add_shortcode('file-proxy', array(&$this, 'return_proxy_link'));
-		add_shortcode('file-proxy-url', array(&$this, 'return_proxy_url'));
+		add_shortcode('ttd-fp-url', array(&$this, 'return_proxy_url'));
 		
 		// adds proxy rewrite rule & query_var
 		add_action('generate_rewrite_rules', array(&$this,'add_rewrite_rules'));
@@ -307,18 +307,23 @@ class TtdFileProxy extends TtdPluginClass
 				
 			case 'link':
 			default:
-				echo "<a href='{$link}' alt='{$alt}'>{$title}</a>";
+				return "<a href='{$link}' alt='{$alt}'>{$title}</a>";
 				break;
 		}
 	}
 	
 	public function return_proxy_url($atts, $content = '')
 	{	
-		global $wpdb;
-		$id = intval($content);
 		
-		$link = $this->generate_url($id);
-		echo $link;
+		extract(shortcode_atts(array(
+				'id' => '0',
+				'alt' => '',
+				'type' => 'link',
+			), $atts));
+			
+		$content = intval( $content );
+		
+		return esc_attr( $this->generate_url($content));
 	}
 		
 	
