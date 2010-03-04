@@ -19,7 +19,7 @@ class TtdFileProxyAdmin
 		
 		$this->domain = $this->m->get_domain();
 		
-		add_action( 'init', array(&$this, 'init') );
+		add_action( 'init', array(&$this, 'init') );	
 	}
 	
 	/**
@@ -32,13 +32,17 @@ class TtdFileProxyAdmin
 	
 		/* Initialize the theme settings page. */
 		add_action( 'admin_menu', array(&$this, 'settings_page_init' ) );
-	
-		/* Save settings page meta boxes. */
-		//add_action( "ttd_file_proxy_update_settings_page", 'ttd_file_proxy_settings' );
-	
-		/* Add a new meta box to the post editor. */
-		//add_action( 'admin_menu', 'ttd_file_proxy_post_meta_box' );
+		
+		/* Adds file proxy button to the upload manager */
+		add_filter( 'attachment_fields_to_edit', array(&$this, 'upload_form_filter'), 999, 2 );
 	}
+	
+	function upload_form_filter( $form_fields, $post ){
+		$link = $this->m->generate_url( $post->ID );
+		$form_fields['url']['html'] = $form_fields['url']['html'] . "<button type='button' class='button urlfileproxy' title='" . esc_attr($link) . "'>" . __( 'File Proxy', $this->domain ) . "</button>";
+		return $form_fields;
+	}
+	
 	
 	/**
 	 * Generate admin url for plugin settings.
@@ -68,7 +72,7 @@ class TtdFileProxyAdmin
 	function settings_page_init() {
 	
 		/* Create the theme settings page. */
-		$this->settings_page =  add_submenu_page( $this->menu_parent, __('File Proxy Settings'), __('File Proxy') , '10', $this->setting_identifier, array(&$this, 'render_settings_page') );
+		$this->settings_page =  add_submenu_page( $this->menu_parent, __('File Proxy Settings' , $this->domain ), __('File Proxy', $this->domain ) , '10', $this->setting_identifier, array(&$this, 'render_settings_page') );
 		
 		/* Register the default theme settings meta boxes. */
 		add_action( "load-{$this->settings_page}", array(&$this, 'create_settings_meta_boxes') );
