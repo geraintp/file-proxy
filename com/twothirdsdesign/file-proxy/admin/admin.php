@@ -94,6 +94,7 @@ class TtdFileProxyAdmin
 	 */
 	function enqueue_style() {
 		wp_enqueue_style( 'iphone-switch' , TTDFP_URL .'assets/css/iphone-switch.css' , false, $this->m->get_option("version"), 'screen' );
+		wp_enqueue_style( 'aaia-admin-style' , TTDFP_URL .'assets/css/admin-style.css' , false, $this->m->get_option("version"), 'screen' );
 	}
 	
 	
@@ -193,7 +194,10 @@ function editUrlKey(){
 	 *
 	 * @since 0.5
 	 */
-	function render_settings_page() { ?>
+	function render_settings_page() {
+		
+		require_once 'settings_page.php';
+		if(false) {?>
 		<div class="wrap">
 		<div id="icon-options-general" class="icon32"><br /></div> 
 		<h2><?php  _e( 'File Proxy Settings', $this->domain ); ?> <small>(<a href="<?php $this->settings_link(); ?>&amp;opt=reset"><?php _e('Reset', $this->domain ); ?></a>)</small></h2>
@@ -224,6 +228,7 @@ function editUrlKey(){
 		</div><!-- #poststuff -->
 
 	</div><!-- .wrap --> <?php
+		}
 	}
 	
 	
