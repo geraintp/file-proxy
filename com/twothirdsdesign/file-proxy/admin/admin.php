@@ -149,6 +149,7 @@ function editUrlKey(){
 		add_meta_box( "file-proxy-about-meta-box", __( 'File Proxy', $this->domain ), array(&$this, 'about_meta_box'), $this->settings_page, 'normal', 'high' );
 		/* Creates a meta box for the general theme settings. */
 		add_meta_box( "file-proxy-general-meta-box", __( 'General Settings', $this->domain ), array(&$this, 'general_settings_meta_box'), $this->settings_page, 'normal', 'high' );
+		add_meta_box( "file-proxy-advanced-meta-box", __( 'Advanced Settings', $this->domain ), array(&$this, 'advanced_settings_meta_box'), $this->settings_page, 'advanced', 'high' );
 	
 		/* Creates a meta box for the footer settings. */
 		//add_meta_box( "{$prefix}-footer-settings-meta-box", __( 'Footer settings', $domain ), 'hybrid_footer_settings_meta_box', $hybrid->settings_page, 'normal', 'high' );
@@ -173,7 +174,7 @@ function editUrlKey(){
 						$this->m->update_option( "cache", isset( $_POST[ 'cache' ] ) ? 'on' : 'off' );
 					
 					$this->m->update_option( "uninstall", isset( $_POST[ 'uninstall' ] ) ? true : false );
-					$this->m->update_option( "url-key", esc_attr( $_POST['url-key']) );
+					$this->m->update_option( "url-key", sanitize_title_with_dashes( strval( $_POST['url-key']) ) );
 					
 					$this->msg = "saved";
 			}
@@ -233,21 +234,24 @@ function editUrlKey(){
 	 * @since 0.5
 	 */
 	
-	function about_meta_box() { 
-		//function hybrid_about_theme_meta_box( $object, $box ) { ?>
+	function about_meta_box() {  ?>
 	
 		<table class="form-table">
 			<tr>
 				<th><?php _e( 'Author:', $this->domain ); ?></th>
-				<td><a href="<?php echo $theme_data['URI']; ?>" title="<?php echo $theme_data['Title']; ?>"><?php echo $theme_data['Author']; ?></a></td>
+				<td><a href="http://wordpress.org/extend/plugins/file-proxy/" title="Geraint Palmer">Geraint Palmer</a></td>
 			</tr>
 			<tr>
 				<th><?php _e( 'Description:', $this->domain ); ?></th>
-				<td><?php echo $theme_data['Description']; ?></td>
+				<td>File Proxy is a simple WordPress plug that lest you protect / restrict access to a specific embedded file.  It lets you embed files from the upload directory into a post or page using a short code that restricts access to registered users.  guest users who click on the link are prompted to login before returning the file.<code>[file-proxy id='attachment_id']link text[/file-proxy]</code>.</td>
 			</tr>
             <tr>
 				<th><?php _e( 'Version:', $this->domain ); ?></th>
 				<td><?php echo $this->m->get_option("version", 0 );?></td>
+			</tr>
+			<tr>
+				<th><?php _e( 'Support:', $this->domain ); ?></th>
+				<td><a href="http://wordpress.org/tags/file-proxy/" title="Support Forum">Support Forum</a></td>
 			</tr>
 		</table><!-- .form-table --><?php
 	}
@@ -296,38 +300,47 @@ function editUrlKey(){
 				<label for="url-key"><?php printf( __("Change the url your file are referenced through, ie %surl-key%s", $this->domain ), $url[0], $url[1] ); ?></label>
 			</td>
 		</tr>
-        <?php if($this->m->get_option('cache') != "disabled"): ?>
-		<tr>
-			<th><label for="cache"><?php _e( 'Caching:', $this->domain ); ?></label></th>
-			<td>
-	            <?php if($this->m->get_option('cache') != "disabled"): ?>
-				<div class="on_off">
-					<input id="cache" name="cache" type="checkbox" <?php if ( $this->m->get_option('cache') == "on" ) echo 'checked="checked"'; ?> value="true" /> 
-				</div>            
-				<label for="cache"><?php _e( 'This setting is not yet used.', $this->domain ); ?></label>
-                <?php else : ?>
-				<label for="cache"><?php _e( 'Error: Caching Disabled, can not write to file system.', $this->domain ); ?></label>
-         		<?php endif; ?>
-			</td>
-		</tr>
-        <?php endif; ?>
-        <tr>
-			<th><label for="uninstall"><?php _e( 'Uninstall:', $this->domain ); ?></label></th>
-			<td>
-            	<div class="on_off danger">
-					<input id="uninstall" name="uninstall" type="checkbox" <?php if((boolean)$this->m->get_option("uninstall")) echo "checked=checked" ?> value="true" />				
-				</div>
-                <div class="helptext">
-                    <label for="uninstall"><?php _e( "This should be \"<strong><em>OFF</em></strong>\" unless you want to permenantly delete this plugin.", $this->domain); ?><br/> 
-					<?php if((boolean)$this->m->get_option("uninstall")) _e( "All information and settings stored by this plugin will be deleted <strong>when the delete button on the plugin page is select.</strong>", $this->domain ); ?></label> 
-                </div>
-			</td>
-		</tr>
 	</table><!-- .form-table --><?php
 	}
 	
-	function settings_header(){
-		
+	
+	/**
+	 * Displays the plugin settings page and calls do_meta_boxes() to allow additional settings
+	 * meta boxes to be added to the page.
+	 *
+	 * @since 0.6
+	 */
+	
+	function advanced_settings_meta_box() {  ?>
+		<table class="form-table">
+	        <?php if($this->m->get_option('cache') != "disabled"): ?>
+			<tr>
+				<th><label for="cache"><?php _e( 'Caching:', $this->domain ); ?></label></th>
+				<td>
+		            <?php if($this->m->get_option('cache') != "disabled"): ?>
+					<div class="on_off">
+						<input id="cache" name="cache" type="checkbox" <?php if ( $this->m->get_option('cache') == "on" ) echo 'checked="checked"'; ?> value="true" /> 
+					</div>            
+					<label for="cache"><?php _e( 'This setting is not yet used.', $this->domain ); ?></label>
+	                <?php else : ?>
+					<label for="cache"><?php _e( 'Error: Caching Disabled, can not write to file system.', $this->domain ); ?></label>
+	         		<?php endif; ?>
+				</td>
+			</tr>
+	        <?php endif; ?>
+			<tr>
+				<th><label for="uninstall"><?php _e( 'Uninstall:', $this->domain ); ?></label></th>
+				<td>
+	            	<div class="on_off danger">
+						<input id="uninstall" name="uninstall" type="checkbox" <?php if((boolean)$this->m->get_option("uninstall")) echo "checked=checked" ?> value="true" />				
+					</div>
+	                <div class="helptext">
+	                    <label for="uninstall"><?php _e( "This should be \"<strong><em>OFF</em></strong>\" unless you want to permenantly delete this plugin.", $this->domain); ?><br/> 
+						<?php if((boolean)$this->m->get_option("uninstall")) _e( "All information and settings stored by this plugin will be deleted <strong>when the delete button on the plugin page is select.</strong>", $this->domain ); ?></label> 
+	                </div>
+				</td>
+			</tr>
+		</table><!-- .form-table --><?php 
 	}
 }
 ?>
