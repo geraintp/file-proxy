@@ -7,7 +7,7 @@
                     <li class=""><a href="#exportoptions">Export Options</a></li>
                 </ul>       
             </div>
-            <div id="content">
+            <div id="content" style="width: 755px;">
                 <div id="generaloptions" class="group" style="display: block;">
                     <h2>Framework Options</h2>
                     <div class="section section-checkbox">
@@ -24,6 +24,7 @@
                           </div>
                        
                        </div>
+
                        <div class="section section-checkbox">
                         <h3 class="heading">Theme Version Checker</h3>
                        <div class="option">
@@ -50,6 +51,7 @@
                             <div class="clear"></div>
                          </div>
                         </div>
+
                         <div class="section section-checkbox">
                         <h3 class="heading">Framework Core update (BETA)</h3>
                        <div class="option">
@@ -63,82 +65,66 @@
                             <div class="clear"></div>
                             </div>
                         </div>
-                        </div>
-                
-                 <div id="importoptions" class="group" style="display: block;">
-                    <h2>Import Options</h2>
-                    <div class="section">
-                        <h3 class="heading">Import options from another ttdThemes instance.</h3>
-                        <div class="option">
-                            <div class="controls">
-                            <textarea rows="8" cols="" id="ttd_import_options" name="ttd_import_options" class="ttd-input"></textarea>
-                            <br/>
-                            </div>
-                            <div class="explain">
-                                You can transfer options from another ttdThemes (same theme) to this one by copying the export code and adding it here. Works best if it's imported from identical themes.
-                            </div>
-                            <div class="clear"></div>
-                            </div>
-                        </div>
-                  </div>
-                  <div id="exportoptions" class="group" style="display: block;">
+                </div>       
+				<div id="importoptions" class="group" style="display: block;">
+					<h2>Import Options</h2>
+					<div class="section">
+						<h3 class="heading">Import options from another ttdThemes instance.</h3>
+						<div class="option">
+							<div class="controls">
+								<textarea rows="8" cols="" id="ttd_import_options" name="ttd_import_options" class="ttd-input"></textarea>
+								<br/>
+							</div>
+							<div class="explain">
+							    You can transfer options from another ttdThemes (same theme) to this one by copying the export code and adding it here. Works best if it's imported from identical themes.
+							</div>
+							<div class="clear"></div>
+						</div>
+					</div>
+				</div>
+                <div id="exportoptions" class="group" style="display: block;">
                      <h2>Export Options</h2>
                      <div class="section">
                         <h3 class="heading">Use the code below to export this themes settings to another theme.</h3>
-                        <div class="option">
-                            <div class="controls">
-                            <?php
-                            //Create, Encrypt and Update the Saved Settings
-                            global $wpdb;
-                            $query = "SELECT * FROM $wpdb->options WHERE option_name LIKE 'ttd_%' AND
-                                        option_name != 'ttd_options' AND
-                                        option_name != 'ttd_template' AND
-                                        option_name != 'ttd_custom_template' AND
-                                        option_name != 'ttd_settings_encode' AND
-                                        option_name != 'ttd_export_options' AND
-                                        option_name != 'ttd_import_options' AND
-                                        option_name != 'ttd_framework_version' AND
-                                        option_name != 'ttd_manual' AND
-                                        option_name != 'ttd_shortname'";
+                        	<div class="option">
+		                        <div class="controls">
+		                            <?php
+		                            //Create, Encrypt and Update the Saved Settings
+		                            global $wpdb;
+		                            $query = "SELECT * FROM $wpdb->options WHERE option_name LIKE 'ttd_%' AND
+	                                            option_name != 'ttd_options' AND
+	                                            option_name != 'ttd_template' AND
+	                                            option_name != 'ttd_custom_template' AND
+	                                            option_name != 'ttd_settings_encode' AND
+	                                            option_name != 'ttd_export_options' AND
+	                                            option_name != 'ttd_import_options' AND
+	                                            option_name != 'ttd_framework_version' AND
+	                                            option_name != 'ttd_manual' AND
+	                                            option_name != 'ttd_shortname'";
                            
-                            $results = $wpdb->get_results($query);
+		                            $results = $wpdb->get_results($query);
                            
-                            foreach ($results as $result){
+		                            foreach ($results as $result){
                            
-                                    $output[$result->option_name] = $result->option_value;
+	                                        $output[$result->option_name] = $result->option_value;
                            
-                            }
-                            $output = serialize($output);
-                            ?>
-                            <textarea rows="8" cols="" class="ttd-input"><?php echo base64_encode($output); ?></textarea>
-                            <br/>
-                            </div>
-                            <div class="explain">
-                                You can transfer options from another ttdThemes (same theme) to this one by copying the export code and adding it here. Works best if it's imported from identical themes.
-                            </div>
-                            <div class="clear"></div>
+		                            }
+		                            $output = serialize($output);
+		                            ?>
+		                            <textarea rows="8" cols="" class="ttd-input"><?php echo base64_encode($output); ?></textarea>
+		                            <br/>
+	                            </div>
+	                            <div class="explain">
+	                                You can transfer options from another ttdThemes (same theme) to this one by copying the export code and adding it here. Works best if it's imported from identical themes.
+	                            </div>
+                            	<div class="clear"></div>
                             </div>
                         </div>
                     </div>
-                    </div>
+                  </div>
                 <div class="clear"></div>
-         
-           
+ 
         </div>
-        <div class="save_bar_top">
-        <img style="display:none" src="<?php echo bloginfo('template_url'); ?>/functions/images/loading-bottom.gif" class="ajax-loading-img ajax-loading-img-bottom" alt="Working..." />
-        <input type="submit" value="Save All Changes" class="button submit-button" />       
-        </form>
-         <?php /*
-        <form action="<?php echo wp_specialchars( $_SERVER['REQUEST_URI'] ) ?>" method="post" style="display:inline" id="ttdform-reset">
-            <span class="submit-footer-reset">
 
-            <input name="reset" type="submit" value="Reset Options" class="button submit-button reset-button" onclick="return confirm('Click OK to reset. Any settings will be lost!');" />
-            <input type="hidden" name="ttd_save" value="reset" />
-            </span>
-        </form>
-        */ ?>
-       
-        </div>
         <?php  // echo $update_message; ?>   
         <?php  //wp_nonce_field('reset_options'); echo "\n"; // Legacy ?>
