@@ -8,18 +8,21 @@
 
 class TtdFileProxy extends TtdPluginClass
 {	
-	protected $plugin_domain='TtdFileProxy';
-	protected $options_key = 'plugin:ttd:file-proxy';
+	protected $plugin_domain = 'TtdFileProxy';
+	protected $options_key   = 'plugin:ttd:file-proxy';
 	protected $options;
 	
 	protected $rules;
 
 	protected $_options = array(
-		'key-length'	=> 7,
-		'uninstall'		=> true,
-		'url-key'		=> 'file',
-		'cache'			=> 'disabled',
-		'permalinks'	=> 'disabled',
+		'key-length'	  	=> 7,
+		'uninstall'		  	=> true,
+		'url-key'		  	=> 'file',
+		'cache'			  	=> 'off',
+		'permalinks'	  	=> 'on',
+		'login-url'			=> '',
+		'default-login-url'	=> '',
+		'redirect-target' 	=> 'file',
 	);
 	
 	function __construct()
@@ -28,7 +31,7 @@ class TtdFileProxy extends TtdPluginClass
 		
 		// pages where our plugin needs translation
 		$local_pages = array('plugins.php');
-		
+			
 		// init options manager
 		$this->options = new GcpOptions($this->options_key, $this->_options);
 		
@@ -143,10 +146,11 @@ class TtdFileProxy extends TtdPluginClass
 	public function install(){
 		switch ( $this->get_option("version", "0") )
 		{
-			case '0.1':
-			case '0.2':
-			case '0.3':
+			case '0.5':
 			case '0.4':
+			case '0.3':
+			case '0.2':
+			case '0.1':
 				// Clears options for previous version
 				delete_option( $this->options_key );
 				break;
@@ -155,8 +159,10 @@ class TtdFileProxy extends TtdPluginClass
 		}
 		if( $this->get_option("cache") != "disabled" )
 			$this->build_cache_dir();
-			
+		
 		$this->update_option("version", TTDFP_VERSION );
+		$this->update_option("default-login-url", get_option('siteurl') . '/wp-login.php' );
+		$this->update_option("login-url", get_option('siteurl') . '/wp-login.php' );	
 	}
 	
 	public function build_cache_dir()
@@ -226,6 +232,8 @@ class TtdFileProxy extends TtdPluginClass
 			if( $id <= 0 ){ return; }
 			
 			if(!is_user_logged_in()){
+				
+				wp_redirect( $this->get_option('login-url') );
 				auth_redirect();
 				exit;
 			}

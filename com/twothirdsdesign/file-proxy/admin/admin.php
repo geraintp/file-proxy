@@ -37,6 +37,11 @@ class TtdFileProxyAdmin
 		add_filter( 'attachment_fields_to_edit', array(&$this, 'upload_form_filter'), 999, 2 );
 	}
 	
+	/**
+	 * needs documenting
+	 *
+	 * @since 0.5
+	 */
 	function upload_form_filter( $form_fields, $post ){
 		$link = "[ttd-fp-url]{$post->ID}[/ttd-fp-url]";
 		$form_fields['url']['html'] = $form_fields['url']['html'] . "<button type='button' class='button urlfileproxy' title='" . esc_attr($link) . "'>" . __( 'File Proxy', $this->domain ) . "</button>";
@@ -117,30 +122,6 @@ class TtdFileProxyAdmin
 	function execute_scripts() { 
 		include 'js.php';
 	}
-
-   
-	/**
-	 * Creates the default meta boxes for the theme settings page. Child theme and plugin developers
-	 * should use add_meta_box() to create additional meta boxes.
-	 *
-	 * @since 0.7
-	 * @global string $hybrid The global theme object.
-	 */
-	function create_settings_meta_boxes() {
-		global $hybrid;
-	
-		/* Get theme information. */
-		$theme_data = get_theme_data( TEMPLATEPATH . '/style.css' );
-	
-		/* Adds the About box for the parent theme. */
-		add_meta_box( "file-proxy-about-meta-box", __( 'File Proxy', $this->domain ), array(&$this, 'about_meta_box'), $this->settings_page, 'normal', 'high' );
-		/* Creates a meta box for the general theme settings. */
-		add_meta_box( "file-proxy-general-meta-box", __( 'General Settings', $this->domain ), array(&$this, 'general_settings_meta_box'), $this->settings_page, 'normal', 'high' );
-		add_meta_box( "file-proxy-advanced-meta-box", __( 'Advanced Settings', $this->domain ), array(&$this, 'advanced_settings_meta_box'), $this->settings_page, 'advanced', 'high' );
-	
-		/* Creates a meta box for the footer settings. */
-		//add_meta_box( "{$prefix}-footer-settings-meta-box", __( 'Footer settings', $domain ), 'hybrid_footer_settings_meta_box', $hybrid->settings_page, 'normal', 'high' );
-	}
 	
 	
 	/**
@@ -166,20 +147,32 @@ class TtdFileProxyAdmin
 					
 					$this->msg = "saved";
 			}
-			else if( $_GET['opt'] == "reset" ){
-				delete_option( $this->m->get_options_key() );
-				$this->m->flush_options();
-				$this->m->update_option("version", TTDPF_VERSION);
-				wp_redirect( $this->get_settings_link() );
+			else if( $_POST['ttd_file_proxy_submit_hidden'] == "reset" ){
+				$this->reset_options();
 			}
 		}
+	}
+	
+	
+	/**
+	 * needs documenting
+	 *
+	 * @since 0.6
+	 */
+	function reset_options(){
+		delete_option( $this->m->get_options_key() );
+		$this->m->flush_options();
+		$this->m->update_option("version", TTDPF_VERSION);
+		$this->m->update_option("default-login-url", get_option('siteurl') . '/wp-login.php' );
+		$this->m->update_option("login-url", get_option('siteurl') . '/wp-login.php' );	
+		wp_redirect( $this->get_settings_link() );
 	}
 
 
 	/**
 	 * Render the admin settings page content header
 	 *
-	 * @since 0.5
+	 * @since 0.6
 	 */
 	function admin_header(){ ?>
         <div class="wrap" id="ttd_file_proxy_container">
@@ -188,20 +181,20 @@ class TtdFileProxyAdmin
         <?php // <form method="post"  enctype="multipart/form-data"> ?>
         <form action="" enctype="multipart/form-data" id="ttdform">
             <div id="header">
-                <div class="logo"><img alt="ttdThemes" src="http://c0392561.cdn.cloudfiles.rackspacecloud.com/plugin-logo.png"/></div>
+                <div class="logo"><img alt="ttdThemes" src="<?php echo TTDFP_URL ?>assets/img/plugin-logo.png"/></div>
                 <div class="theme-info">
-                    <span class="theme">File-Proxy<?php echo $themename; ?> <?php echo $local_version; ?></span>
-                    <span class="framework">version <?php echo $this->m->get_option("version", 0 ); ?></span>
+                    <span class="theme"><?php _e('File-Proxy', $this->domain) ?></span>
+                    <span class="framework"><?php echo __('version', $this->domain) . $this->m->get_option("version", 0 ); ?></span>
                 </div>
                 <div class="clear"></div>
             </div>
             <div id="support-links">
        
                 <ul>
-                    <li class="changelog"><a title="Theme Changelog" href="<?php echo $manualurl; ?>#Changelog">View Changelog</a></li>
-                    <li class="docs"><a title="Theme Documentation" href="<?php echo $manualurl; ?>">View Themedocs</a></li>
-                    <li class="forum"><a href="http://forum.ttdthemes.com" target="blank">Visit Forum</a></li>
-                    <li class="right"><img style="display:none" src="<?php echo bloginfo('template_url'); ?>/functions/images/loading-top.gif" class="ajax-loading-img ajax-loading-img-top" alt="Working..." /><a href="#" id="expand_options" class='hide-if-no-js'>[+]</a> <input type="submit" value="Save All Changes" class="button submit-button" /></li>
+                    <li class="changelog"><a title="<?php _e('Changelog', $this->domain) ?>" href="<?php echo $manualurl; ?>#Changelog"><?php _e('View Changelog', $this->domain) ?></a></li>
+                    <li class="docs"><a title="<?php _e('Documentation', $this->domain) ?>" href="<?php echo $manualurl; ?>"><?php _e('View Plugin docs', $this->domain) ?></a></li>
+                    <li class="forum"><a href="http://wordpress.org/tags/file-proxy/" target="blank"><?php _e('Visit Forum', $this->domain) ?></a></li>
+                    <li class="right"><img style="display:none" src="<?php echo bloginfo('template_url'); ?>/functions/images/loading-top.gif" class="ajax-loading-img ajax-loading-img-top" alt="Working..." /><a href="#" id="expand_options" class='hide-if-no-js'>[+]</a> <input type="submit" value="<?php _e('Save All Changes', $this->domain) ?>" class="button submit-button" /></li>
                 </ul>
        
             </div><?php 
@@ -211,7 +204,7 @@ class TtdFileProxyAdmin
 	/**
 	 * Render the admin settings page content footer
 	 *
-	 * @since 0.5
+	 * @since 0.6
 	 */
 	function admin_footer(){ ?>
 			<div class="save_bar_top">
@@ -221,7 +214,7 @@ class TtdFileProxyAdmin
 					<form action="<?php echo wp_specialchars( $_SERVER['REQUEST_URI'] ) ?>" method="post" style="display:inline" id="ttdform-reset">
 						<span class="submit-footer-reset">
 							<input name="reset" type="submit" value="Reset Options" class="button submit-button reset-button" onclick="return confirm('Click OK to reset. Any settings will be lost!');" />
-							<input type="hidden" name="ttd_save" value="reset" />
+							<input type="hidden" name="ttd_file_proxy_submit_hidden" value="reset" />
 						</span>
 					</form>
 				</div>
@@ -232,16 +225,14 @@ class TtdFileProxyAdmin
 	}
 	
 	/**
-	 * Render the admin settings page content header
+	 * Render the admin settings page content
 	 *
-	 * @since 0.5
+	 * @since 0.6
 	 */
-	function render_page()
+	function render_page( $panels )
 	{
-		$panels[] = array( 'name' => 'generaloptions', 'title' => 'General Options' );
-		$panels[] = array( 'name' => 'advancedoptions', 'title' => 'Advanced Options' );
-		$first = true;
-		?>
+		$this->admin_header();
+		$first = true; ?>
 		<div id="main">
             <div id="ttd-nav" class="hide-if-no-js">
                 <ul>
@@ -258,49 +249,149 @@ class TtdFileProxyAdmin
 			<div class="clear"></div>
 		</div>
 		<?php
+		$this->admin_footer();
 	}
 	
 	/**
-	 * Displays the plugin settings page and calls do_meta_boxes() to allow additional settings
-	 * meta boxes to be added to the page.
-	 *
-	 * @since 0.5
+	 * @since 0.6
 	 */
-	function render_panel($panel)
+	function render_panel( $panel )
 	{ ?>
 		<div id="<?php echo $panel['name'] ?>" class="group" style="display: block;">
-                <h2 style="display: block;"><?php echo $panel['title'] ?></h2>
-				<!-- option -->
-				<div class="section section-checkbox">
-					<h3 class="heading">Theme Version Checker</h3>
-					<div class="option">
-						<div class="controls on_off danger">
-							<input id="ttd_theme_version_checker" name="ttd_theme_version_checker" class="checkbox ttd-input" type="checkbox" value="true" <?php if(get_option('ttd_theme_version_checker') == 'true' ) { echo 'checked=""'; } ?>/>
-							<br/>
-						</div>
-						<div class="explain">
-					    	This will enable notices on your theme options page that there is an update available for your theme.
-						</div>
-						<div class="clear"></div>
-					</div>
-				</div>
-		 </div><?php
+            <h2 style="display: block;"><?php echo $panel['title'] ?></h2>
+            <!-- option -->
+			<?php foreach ( $panel['options'] as $option ) {
+				if ( method_exists($this, "{$option['type']}" ) )
+					call_user_func( array( $this, "{$option['type']}" ), $option, $this->m->get_option($option['name']) );
+			} ?>
+            
+		</div><?php
 	}
+	
+	
+	function pre_field( $title, $type )
+	{ ?>
+		<div class="section section-<?php echo $type ?>">
+                <h3 class="heading"><?php echo $title ?></h3>
+                <div class="option"><?php	
+	}
+	
+	function post_field( $desc )
+	{	?>
+                <div class="explain">
+                    <?php echo $desc ?> 
+                </div>
+                <div class="clear"></div>
+            </div>
+        </div><?php 
+	}
+	
+	/**
+	 *
+	 * @since 0.6
+	 */	
+	function checkbox( $args = array(), $value = false )
+	{ 
+		$this->pre_field( $args['title'], 'checkbox' );
+		
+		if( (string)$value != "disabled" ): ?>
+                    <div class="controls on_off <?php echo $args['class'] ?>">
+                        <input id="<?php echo $args['name'] ?>" name="<?php echo $args['name'] ?>" class="checkbox ttd-input" type="checkbox" value="true" <?php echo ( $value == "on" || $value == 1 ) ? 'checked="checked"' : ''; ?>/>
+                    	<br/>
+                    </div>
+        <?php endif;
+		
+		$this->post_field( $args['description'] );
+	}
+		
+	
+	/**
+	 *
+
+	 * @since 0.6
+	 */	
+	function textfield ( $args = array(), $value = '' )
+	{ 
+		$this->pre_field( $args['title'], 'text' ); ?>
+				<div class="controls"> 
+					<input class="ttd-input" name="<?php echo $args['name'] ?>" id="<?php echo $args['name'] ?>" type="text" value="<?php echo $value ?>" /><br/>
+                </div>
+		<?php
+		$this->post_field( $args['description'] );
+	} 
+	
+	/**
+	 *
+	 *
+	 * @since 0.6
+	 */	
+	function select ( $args = array(), $value = '' )
+	{
+		$this->pre_field( $args['title'], 'select' ); ?>  
+				<div class="controls"> 
+					<select class="ttd-input" name="<?php echo $args['name'] ?>" id="<?php echo $args['name'] ?>">
+                    	<?php foreach( $args['options'] as $option ): ?>
+                        <option <?php echo $option == $value ? 'selected="selected"' : '' ; ?>><?php echo $option ?></option>
+                        <?php endforeach; ?>
+                     </select><br/>
+                </div> <?php
+		 $this->post_field( $args['description'] );
+	}	
 	
 	/**
 	 * Displays the plugin settings page and calls do_meta_boxes() to allow additional settings
 	 * meta boxes to be added to the page.
 	 *
-	 * @since 0.5
+	 * @since 0.6
 	 */
-	function render_settings_page() {
+	function render_settings_page() 
+	{	
+		global $wp_rewrite;
 		
-		$this->admin_header();
-		//require_once 'settings_page.php';
-		$this->render_page();
-		$this->admin_footer();
+		$url = $this->m->generate_url( 0 );
+		$url = explode( $this->m->get_option('url-key'), $url);
 		
-		if(false) {?>
+		$cache_desc = (string)$this->m->get_option("cache") == "disabled" ? __( 'Error: Caching Disabled, can not write to file system.', $this->domain ) :
+																			__('This setting is not yet used.', $this->domain);															
+		
+		$url_key_desc = sprintf( __("Change the url your file are referenced through, ie %surl-key%s", $this->domain ), $url[0], $url[1] );
+		$login_url = __("The url guest visiters should be redirected to.", $this->domain );
+		$redirect_target = __("Where a user should been sent after login in", $this->domain );
+		
+		$panels[] = array( 'name'    => 'generaloptions', 
+						   'title'   => __('General Options', $this->domain),
+						   'options' => array( array( 'name'  => 'url-key', 'title' => __('URL Key', $this->domain), 'type'  => 'textfield', 'description' => $url_key_desc ),
+											   array( 'name'  => 'login-url', 'title' => __('Login Redirect URL', $this->domain), 'type'  => 'textfield', 'description' => $login_url ),
+											   array( 'name'  => 'redirect-target', 'title' => __('Redirect Target', $this->domain), 'type'  => 'select', 'description' => $redirect_target, 'options' => array( 'file', 'page' ) ),
+											   array( 'name'  => 'cache', 'title' => __('Cache', $this->domain), 'type'  => 'checkbox', 'description' => $cache_desc ),
+											 )
+						  );
+			
+		$perma_desc = $wp_rewrite->using_permalinks() ? '<span id="change-permalinks"><a href="options-permalink.php" class="button" target="_blank">'. __('Change Permalinks') .'</a></span>' :
+														 __('Uses permalink urls.', $this->domain );
+		
+		if((string)$this->m->get_option("permalinks") == "disabled" )
+			$perma_desc = __('This setting is not yet used.', $this->domain);
+				
+		$panels[] = array( 'name'    => 'permalinkoptions', 
+						   'title'   => __('Permalink Options', $this->domain),
+						   'options' => array( array( 'name'  => 'permalinks', 'title' => __('Permalinks', $this->domain), 'type'  => 'checkbox', 'description' => $perma_desc )
+											 )
+						  );
+		
+		$uninstall_desc =  __("This setting should be \"<strong><em>OFF</em></strong>\" unless you want to permenantly delete this plugin.", $this->domain );
+		$uninstall_desc .= (boolean)$this->m->get_option("uninstall") ? "<br/>". __( "All information and settings stored by this plugin will be deleted <strong>when the delete button on the plugin page is select.</strong>", $this->domain ) : '';
+		
+		$panels[] = array( 'name'    => 'advancedoptions', 
+						   'title'   => __('Advanced Options', $this->domain),
+						   'options' => array( array( 'name'  => 'uninstall', 'title' => __('Uninstall', $this->domain), 'type'  => 'checkbox', 'description' => $uninstall_desc, "class" => "danger" )
+											 )
+						  );
+		
+		
+		$this->render_page( $panels );
+		
+		/*?>
 		<div class="wrap">
 		<div id="icon-options-general" class="icon32"><br /></div> 
 		<h2><?php  _e( 'File Proxy Settings', $this->domain ); ?> <small>(<a href="<?php $this->settings_link(); ?>&amp;opt=reset"><?php _e('Reset', $this->domain ); ?></a>)</small></h2>
@@ -330,8 +421,31 @@ class TtdFileProxyAdmin
 
 		</div><!-- #poststuff -->
 
-	</div><!-- .wrap --> <?php
-		}
+	</div><!-- .wrap --> <?php */
+	}
+	
+	/**----------------------------------------------------------------------------------------------**/
+	/**-------------------------------------------DEPRICATED-----------------------------------------**/
+	/**----------------------------------------------------------------------------------------------**/
+	
+
+	/**
+	 * Creates the default meta boxes for the theme settings page. Child theme and plugin developers
+	 * should use add_meta_box() to create additional meta boxes.
+	 *
+	 * @since 0.7
+	 * @global string $hybrid The global theme object.
+	 */
+	function create_settings_meta_boxes() {	
+	
+		/* Adds the About box for the parent theme. */
+		add_meta_box( "file-proxy-about-meta-box", __( 'File Proxy', $this->domain ), array(&$this, 'about_meta_box'), $this->settings_page, 'normal', 'high' );
+		/* Creates a meta box for the general theme settings. */
+		add_meta_box( "file-proxy-general-meta-box", __( 'General Settings', $this->domain ), array(&$this, 'general_settings_meta_box'), $this->settings_page, 'normal', 'high' );
+		add_meta_box( "file-proxy-advanced-meta-box", __( 'Advanced Settings', $this->domain ), array(&$this, 'advanced_settings_meta_box'), $this->settings_page, 'advanced', 'high' );
+	
+		/* Creates a meta box for the footer settings. */
+		//add_meta_box( "{$prefix}-footer-settings-meta-box", __( 'Footer settings', $domain ), 'hybrid_footer_settings_meta_box', $hybrid->settings_page, 'normal', 'high' );
 	}
 	
 	
