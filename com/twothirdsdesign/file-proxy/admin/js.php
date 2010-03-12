@@ -2,15 +2,7 @@
 //<![CDATA[
 jQuery(document).ready( function() {
 	jQuery('.on_off :checkbox').iphoneStyle();
-	jQuery('#url-key-feild').hide();
 });
-
-function editUrlKey(){
-	jQuery('#url-key-feild').toggle();
-	jQuery('#editable-post-name').toggle();
-	var text = jQuery('#url-key-feild').val();
-	jQuery('#editable-post-name').text(text);
-}
 //]]>
 </script> 
 <?php 
@@ -207,7 +199,7 @@ function editUrlKey(){
                 <?php if(isset($_REQUEST['page']) && $_REQUEST['page'] == 'ttdthemes_framework_settings'){ ?>
                 type: 'framework',
                 <?php } ?>
-                action: 'ttd_ajax_post_action',
+                action: 'wp_ajax_ttd_file_proxy_action',
                 data: serializedReturn
             };
             

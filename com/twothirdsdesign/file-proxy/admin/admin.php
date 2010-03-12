@@ -1,25 +1,28 @@
 <?php
+require_once( TTDFP_CORE.DS.'ttd_plugin_admin_class.php' );
 /**
  * Ttd File Proxy - Admin Settings Plugin Class File
  *
  * @return void
  * @author Geraint Palmer 
  */
-class TtdFileProxyAdmin
+class TtdFileProxyAdmin extends TtdPluginAdminClass
 {
 	protected $m;
 	protected $menu_parent 			= 'options-general.php';
 	protected $setting_identifier 	= 'ttd_file_proxy';
 	protected $msg;
 	
-	function __construct( $mainReference )
+	function __construct( $main_ref )
 	{
-		$this->m = &$mainReference;
+		$this->m = &$main_ref;
 		$this->m->get_option("uninstall");
 		
 		$this->domain = $this->m->get_domain();
 		
-		add_action( 'init', array(&$this, 'init') );	
+		add_action( 'init', array(&$this, 'init') );
+		
+		add_action('wp_ajax_ttd_file_proxy_action', array(&$this, 'admin_ajax_commit') );	
 	}
 	
 	/**
@@ -38,7 +41,7 @@ class TtdFileProxyAdmin
 	}
 	
 	/**
-	 * needs documenting
+	 * add file proxy button to the media upload manager.
 	 *
 	 * @since 0.5
 	 */
@@ -79,8 +82,6 @@ class TtdFileProxyAdmin
 		/* Create the theme settings page. */
 		$this->settings_page =  add_submenu_page( $this->menu_parent, __('File Proxy Settings' , $this->domain ), __('File Proxy', $this->domain ) , '10', $this->setting_identifier, array(&$this, 'render_settings_page') );
 		
-		/* Register the default theme settings meta boxes. */
-		add_action( "load-{$this->settings_page}", array(&$this, 'create_settings_meta_boxes') );
 	
 		/* Make sure the settings are saved. */
 		add_action( "load-{$this->settings_page}", array(&$this, 'load_settings_page') );
@@ -168,175 +169,7 @@ class TtdFileProxyAdmin
 		wp_redirect( $this->get_settings_link() );
 	}
 
-
-	/**
-	 * Render the admin settings page content header
-	 *
-	 * @since 0.6
-	 */
-	function admin_header(){ ?>
-        <div class="wrap" id="ttd_file_proxy_container">
-        <div id="ttd-popup-save" class="ttd-save-popup"><div class="ttd-save-save">Options Updated</div></div>
-        <div id="ttd-popup-reset" class="ttd-save-popup"><div class="ttd-save-reset">Options Reset</div></div>
-        <?php // <form method="post"  enctype="multipart/form-data"> ?>
-        <form action="" enctype="multipart/form-data" id="ttdform">
-            <div id="header">
-                <div class="logo"><img alt="ttdThemes" src="<?php echo TTDFP_URL ?>assets/img/plugin-logo.png"/></div>
-                <div class="theme-info">
-                    <span class="theme"><?php _e('File-Proxy', $this->domain) ?></span>
-                    <span class="framework"><?php echo __('version', $this->domain) . $this->m->get_option("version", 0 ); ?></span>
-                </div>
-                <div class="clear"></div>
-            </div>
-            <div id="support-links">
-       
-                <ul>
-                    <li class="changelog"><a title="<?php _e('Changelog', $this->domain) ?>" href="<?php echo $manualurl; ?>#Changelog"><?php _e('View Changelog', $this->domain) ?></a></li>
-                    <li class="docs"><a title="<?php _e('Documentation', $this->domain) ?>" href="<?php echo $manualurl; ?>"><?php _e('View Plugin docs', $this->domain) ?></a></li>
-                    <li class="forum"><a href="http://wordpress.org/tags/file-proxy/" target="blank"><?php _e('Visit Forum', $this->domain) ?></a></li>
-                    <li class="right"><img style="display:none" src="<?php echo bloginfo('template_url'); ?>/functions/images/loading-top.gif" class="ajax-loading-img ajax-loading-img-top" alt="Working..." /><a href="#" id="expand_options" class='hide-if-no-js'>[+]</a> <input type="submit" value="<?php _e('Save All Changes', $this->domain) ?>" class="button submit-button" /></li>
-                </ul>
-       
-            </div><?php 
-	}
 	
-	
-	/**
-	 * Render the admin settings page content footer
-	 *
-	 * @since 0.6
-	 */
-	function admin_footer(){ ?>
-			<div class="save_bar_top">
-				<img style="display:none" src="<?php echo bloginfo('template_url'); ?>/functions/images/loading-bottom.gif" class="ajax-loading-img ajax-loading-img-bottom" alt="Working..." />
-				<input type="submit" value="Save All Changes" class="button submit-button" />       
-				</form>
-					<form action="<?php echo wp_specialchars( $_SERVER['REQUEST_URI'] ) ?>" method="post" style="display:inline" id="ttdform-reset">
-						<span class="submit-footer-reset">
-							<input name="reset" type="submit" value="Reset Options" class="button submit-button reset-button" onclick="return confirm('Click OK to reset. Any settings will be lost!');" />
-							<input type="hidden" name="ttd_file_proxy_submit_hidden" value="reset" />
-						</span>
-					</form>
-				</div>
-			</div>
-
-			<div style="clear:both;"></div>   
-		</div><!--wrap--><?php
-	}
-	
-	/**
-	 * Render the admin settings page content
-	 *
-	 * @since 0.6
-	 */
-	function render_page( $panels )
-	{
-		$this->admin_header();
-		$first = true; ?>
-		<div id="main">
-            <div id="ttd-nav" class="hide-if-no-js">
-                <ul>
-				<?php foreach ( $panels as $panel ): ?>
-					<li <?php echo $first ? 'class="current"': ''; ?> ><a href="#<?php echo $panel['name'] ?>"><?php echo $panel['title']; $first = false; ?></a></li>
-				<?php endforeach ?>
-				</ul>
-			</div>
-			<div id="content" style="width: 755px;"><?php 
-				foreach ($panels as $panel) {
-					$this->render_panel($panel);
-				} ?>
-			</div>
-			<div class="clear"></div>
-		</div>
-		<?php
-		$this->admin_footer();
-	}
-	
-	/**
-	 * @since 0.6
-	 */
-	function render_panel( $panel )
-	{ ?>
-		<div id="<?php echo $panel['name'] ?>" class="group" style="display: block;">
-            <h2 style="display: block;"><?php echo $panel['title'] ?></h2>
-            <!-- option -->
-			<?php foreach ( $panel['options'] as $option ) {
-				if ( method_exists($this, "{$option['type']}" ) )
-					call_user_func( array( $this, "{$option['type']}" ), $option, $this->m->get_option($option['name']) );
-			} ?>
-            
-		</div><?php
-	}
-	
-	
-	function pre_field( $title, $type )
-	{ ?>
-		<div class="section section-<?php echo $type ?>">
-                <h3 class="heading"><?php echo $title ?></h3>
-                <div class="option"><?php	
-	}
-	
-	function post_field( $desc )
-	{	?>
-                <div class="explain">
-                    <?php echo $desc ?> 
-                </div>
-                <div class="clear"></div>
-            </div>
-        </div><?php 
-	}
-	
-	/**
-	 *
-	 * @since 0.6
-	 */	
-	function checkbox( $args = array(), $value = false )
-	{ 
-		$this->pre_field( $args['title'], 'checkbox' );
-		
-		if( (string)$value != "disabled" ): ?>
-                    <div class="controls on_off <?php echo $args['class'] ?>">
-                        <input id="<?php echo $args['name'] ?>" name="<?php echo $args['name'] ?>" class="checkbox ttd-input" type="checkbox" value="true" <?php echo ( $value == "on" || $value == 1 ) ? 'checked="checked"' : ''; ?>/>
-                    	<br/>
-                    </div>
-        <?php endif;
-		
-		$this->post_field( $args['description'] );
-	}
-		
-	
-	/**
-	 *
-
-	 * @since 0.6
-	 */	
-	function textfield ( $args = array(), $value = '' )
-	{ 
-		$this->pre_field( $args['title'], 'text' ); ?>
-				<div class="controls"> 
-					<input class="ttd-input" name="<?php echo $args['name'] ?>" id="<?php echo $args['name'] ?>" type="text" value="<?php echo $value ?>" /><br/>
-                </div>
-		<?php
-		$this->post_field( $args['description'] );
-	} 
-	
-	/**
-	 *
-	 *
-	 * @since 0.6
-	 */	
-	function select ( $args = array(), $value = '' )
-	{
-		$this->pre_field( $args['title'], 'select' ); ?>  
-				<div class="controls"> 
-					<select class="ttd-input" name="<?php echo $args['name'] ?>" id="<?php echo $args['name'] ?>">
-                    	<?php foreach( $args['options'] as $option ): ?>
-                        <option <?php echo $option == $value ? 'selected="selected"' : '' ; ?>><?php echo $option ?></option>
-                        <?php endforeach; ?>
-                     </select><br/>
-                </div> <?php
-		 $this->post_field( $args['description'] );
-	}	
 	
 	/**
 	 * Displays the plugin settings page and calls do_meta_boxes() to allow additional settings
@@ -354,9 +187,9 @@ class TtdFileProxyAdmin
 		$cache_desc = (string)$this->m->get_option("cache") == "disabled" ? __( 'Error: Caching Disabled, can not write to file system.', $this->domain ) :
 																			__('This setting is not yet used.', $this->domain);															
 		
-		$url_key_desc = sprintf( __("Change the url your file are referenced through, ie %surl-key%s", $this->domain ), $url[0], $url[1] );
-		$login_url = __("The url guest visiters should be redirected to.", $this->domain );
-		$redirect_target = __("Where a user should been sent after login in", $this->domain );
+		$url_key_desc = sprintf( __("Change the url your file are referenced through, i.e. %surl-key%s", $this->domain ), $url[0], $url[1] );
+		$login_url = __("The url guest visitors should be redirected to.", $this->domain );
+		$redirect_target = __("Where a user should been sent after logging in.", $this->domain );
 		
 		$panels[] = array( 'name'    => 'generaloptions', 
 						   'title'   => __('General Options', $this->domain),
@@ -423,146 +256,267 @@ class TtdFileProxyAdmin
 
 	</div><!-- .wrap --> <?php */
 	}
-	
-	/**----------------------------------------------------------------------------------------------**/
-	/**-------------------------------------------DEPRICATED-----------------------------------------**/
-	/**----------------------------------------------------------------------------------------------**/
-	
 
-	/**
-	 * Creates the default meta boxes for the theme settings page. Child theme and plugin developers
-	 * should use add_meta_box() to create additional meta boxes.
-	 *
-	 * @since 0.7
-	 * @global string $hybrid The global theme object.
-	 */
-	function create_settings_meta_boxes() {	
-	
-		/* Adds the About box for the parent theme. */
-		add_meta_box( "file-proxy-about-meta-box", __( 'File Proxy', $this->domain ), array(&$this, 'about_meta_box'), $this->settings_page, 'normal', 'high' );
-		/* Creates a meta box for the general theme settings. */
-		add_meta_box( "file-proxy-general-meta-box", __( 'General Settings', $this->domain ), array(&$this, 'general_settings_meta_box'), $this->settings_page, 'normal', 'high' );
-		add_meta_box( "file-proxy-advanced-meta-box", __( 'Advanced Settings', $this->domain ), array(&$this, 'advanced_settings_meta_box'), $this->settings_page, 'advanced', 'high' );
-	
-		/* Creates a meta box for the footer settings. */
-		//add_meta_box( "{$prefix}-footer-settings-meta-box", __( 'Footer settings', $domain ), 'hybrid_footer_settings_meta_box', $hybrid->settings_page, 'normal', 'high' );
-	}
-	
-	
-	/**
-	 * Displays the plugin settings page and calls do_meta_boxes() to allow additional settings
-	 * meta boxes to be added to the page.
-	 *
-	 * @since 0.5
-	 */
-	
-	function about_meta_box() {  ?>
-	
-		<table class="form-table">
-			<tr>
-				<th><?php _e( 'Author:', $this->domain ); ?></th>
-				<td><a href="http://wordpress.org/extend/plugins/file-proxy/" title="Geraint Palmer">Geraint Palmer</a></td>
-			</tr>
-			<tr>
-				<th><?php _e( 'Description:', $this->domain ); ?></th>
-				<td>File Proxy is a simple WordPress plug that lest you protect / restrict access to a specific embedded file.  It lets you embed files from the upload directory into a post or page using a short code that restricts access to registered users.  guest users who click on the link are prompted to login before returning the file.<code>[file-proxy id='attachment_id']link text[/file-proxy]</code>.</td>
-			</tr>
-            <tr>
-				<th><?php _e( 'Version:', $this->domain ); ?></th>
-				<td><?php echo $this->m->get_option("version", 0 );?></td>
-			</tr>
-			<tr>
-				<th><?php _e( 'Support:', $this->domain ); ?></th>
-				<td><a href="http://wordpress.org/tags/file-proxy/" title="Support Forum">Support Forum</a></td>
-			</tr>
-		</table><!-- .form-table --><?php
-	}
 
-	
-	
-	/**
-	 * Displays the plugin settings page and calls do_meta_boxes() to allow additional settings
-	 * meta boxes to be added to the page.
-	 *
-	 * @since 0.5
-	 */
-	
-	function general_settings_meta_box() { 
-		global $wp_rewrite;
-		
-		$url = $this->m->generate_url( 0 );
-		$url = explode( $this->m->get_option('url-key'), $url);
-	?>
 
-	<table class="form-table">
-		<?php if($this->m->get_option('permalinks') != "disabled"): ?>
-		<tr>
-			<th><label for="permalinks"><?php _e( 'Use Permalinks:', $this->domain ); ?></label></th>
-			<td>
-            	<?php if($wp_rewrite->using_permalinks()): ?>
-            	<div class="on_off">
-					<input id="permalinks" name="permalinks" type="checkbox" <?php if($this->m->get_option("permalinks") == 'on') echo "checked=checked" ?> value="true" />				
-				</div>
-                <div class="helptext">
-                    <label for="permalinks"><?php _e( "Uses permalink urls", $this->domain ); ?></label> 
-                </div>
-                <?php else: ?>
-                	<span id="change-permalinks"><a href="options-permalink.php" class="button" target="_blank">Change Permalinks</a></span>
-				<?php endif; ?>
-			</td>
-		</tr>
-       	<?php endif; ?>
-		<tr>
-			<th><label for="url-key"><?php _e( 'Url Key:', $this->domain ); ?></label></th>
-			<td>
-				<span id="sample-url-key"><?php echo $url[0] ?><input id="url-key-feild" name="url-key" value="<?php echo $this->m->get_option('url-key') ?>" type="text"><span id="editable-post-name" class="hide-if-no-js" title="Click to edit this part of the permalink"><?php echo $this->m->get_option('url-key') ?></span><?php echo $url[1]; ?></span> 
-				
-				<span id="edit-slug-buttons"><a href="#post_name" class="edit-slug button hide-if-no-js" onclick="editUrlKey(); return false;">edit</a></span>
-				<br/>
-				<label for="url-key"><?php printf( __("Change the url your file are referenced through, ie %surl-key%s", $this->domain ), $url[0], $url[1] ); ?></label>
-			</td>
-		</tr>
-	</table><!-- .form-table --><?php
-	}
-	
-	
-	/**
-	 * Displays the plugin settings page and calls do_meta_boxes() to allow additional settings
-	 * meta boxes to be added to the page.
-	 *
-	 * @since 0.6
-	 */
-	
-	function advanced_settings_meta_box() {  ?>
-		<table class="form-table">
-	        <?php if($this->m->get_option('cache') != "disabled"): ?>
-			<tr>
-				<th><label for="cache"><?php _e( 'Caching:', $this->domain ); ?></label></th>
-				<td>
-		            <?php if($this->m->get_option('cache') != "disabled"): ?>
-					<div class="on_off">
-						<input id="cache" name="cache" type="checkbox" <?php if ( $this->m->get_option('cache') == "on" ) echo 'checked="checked"'; ?> value="true" /> 
-					</div>            
-					<label for="cache"><?php _e( 'This setting is not yet used.', $this->domain ); ?></label>
-	                <?php else : ?>
-					<label for="cache"><?php _e( 'Error: Caching Disabled, can not write to file system.', $this->domain ); ?></label>
-	         		<?php endif; ?>
-				</td>
-			</tr>
-	        <?php endif; ?>
-			<tr>
-				<th><label for="uninstall"><?php _e( 'Uninstall:', $this->domain ); ?></label></th>
-				<td>
-	            	<div class="on_off danger">
-						<input id="uninstall" name="uninstall" type="checkbox" <?php if((boolean)$this->m->get_option("uninstall")) echo "checked=checked" ?> value="true" />				
-					</div>
-	                <div class="helptext">
-	                    <label for="uninstall"><?php _e( "This should be \"<strong><em>OFF</em></strong>\" unless you want to permenantly delete this plugin.", $this->domain); ?><br/> 
-						<?php if((boolean)$this->m->get_option("uninstall")) _e( "All information and settings stored by this plugin will be deleted <strong>when the delete button on the plugin page is select.</strong>", $this->domain ); ?></label> 
-	                </div>
-				</td>
-			</tr>
-		</table><!-- .form-table --><?php 
-	}
+	function admin_ajax_commit() {
+		global $wpdb; // this is how you get access to the database
+		$themename = get_option('template') . "_";
+		//Uploads
+		if(isset($_POST['type'])){
+			if($_POST['type'] == 'upload'){
+
+				$clickedID = $_POST['data']; // Acts as the name
+				$filename = $_FILES[$clickedID];
+				$override['test_form'] = false;
+				$override['action'] = 'wp_handle_upload';    
+				$uploaded_file = wp_handle_upload($filename,$override);
+
+						$upload_tracking[] = $clickedID;
+						update_option( $clickedID , $uploaded_file['url'] );
+						//update_option( $themename . $clickedID , $uploaded_file['url'] );
+				 if(!empty($uploaded_file['error'])) {echo 'Upload Error: ' . $uploaded_file['error']; }	
+				 else { echo $uploaded_file['url']; } // Is the Response
+			}
+
+
+			elseif($_POST['type'] == 'image_reset'){
+
+					$id = $_POST['data']; // Acts as the name
+					global $wpdb;
+					$query = "DELETE FROM $wpdb->options WHERE option_name LIKE '$id'";
+					$wpdb->query($query);
+					//die;
+
+			}
+			elseif($_POST['type'] == 'framework'){
+
+				$data = $_POST['data'];
+				parse_str($data,$output);
+
+				foreach($output as $id => $value){
+
+					if($id == 'woo_import_options'){
+
+						//Decode and over write options.
+						$new_import = base64_decode($value);
+						$new_import = unserialize($new_import);
+						print_r($new_import);
+
+						if(!empty($new_import)) {
+							foreach($new_import as $id2 => $value2){
+
+								if(is_serialized($value2)) {
+
+									update_option($id2,unserialize($value2));
+
+								} else {
+
+									update_option($id2,$value2);
+
+								}
+							}
+						}
+					}
+
+					// Woo Show Option Save
+					if(!isset($output['woo_show_options'])){ 
+						update_option('woo_show_options','false'); 
+					}
+					elseif ( $id == 'woo_show_options' AND $value == 'true') { update_option($id,'true'); }
+
+					// Woo Theme Version Checker Save
+					if(!isset($output['woo_theme_version_checker'])){ 
+						update_option('woo_theme_version_checker','false'); 
+					}
+					elseif ( $id == 'woo_theme_version_checker' AND $value == 'true') { update_option($id,'true'); }
+
+
+					// Woo Core update Save
+					if(!isset($output['woo_framework_update'])){ 
+						update_option('woo_framework_update','false'); 
+					}
+					elseif ( $id == 'woo_framework_update' AND $value == 'true') { update_option($id,'true'); }
+
+					// Woo Buy Themes Save
+					if(!isset($output['woo_buy_themes'])){ 
+						update_option('woo_buy_themes','false'); 
+					}
+					elseif ( $id == 'woo_buy_themes' AND $value == 'true') { update_option($id,'true'); }
+
+
+				}
+
+			}
+		}
+
+		else {
+			$data = $_POST['data'];
+			parse_str($data,$output);
+
+			print_r($output);
+
+			$options =  get_option('woo_template');
+
+			foreach($options as $option_array){
+
+
+					if(isset($option_array['id'])) { // Headings...
+
+
+						$id = $option_array['id'];
+						$old_value = get_option($id);
+						$new_value = '';
+
+						if(isset($output[$id])){
+							$new_value = $output[$option_array['id']];
+						}
+						$type = $option_array['type'];
+
+
+						if ( is_array($type)){
+									foreach($type as $array){
+										if($array['type'] == 'text'){
+											$id = $array['id'];
+											$new_value = $output[$id];
+											update_option( $id, stripslashes($new_value));
+										}
+									}                 
+						}
+						elseif($new_value == '' && $type == 'checkbox'){ // Checkbox Save
+
+							update_option($id,'false');
+							//update_option($themename . $id,'false');
+
+
+						}
+						elseif ($new_value == 'true' && $type == 'checkbox'){ // Checkbox Save
+
+							update_option($id,'true');
+							//update_option($themename . $id,'true');
+
+						}
+						elseif($type == 'multicheck'){ // Multi Check Save
+
+							$options = $option_array['options'];
+
+							foreach ($options as $options_id => $options_value){
+
+								$multicheck_id = $id . "_" . $options_id;
+
+								if(!isset($output[$multicheck_id])){
+								  update_option($multicheck_id,'false');
+								  //update_option($themename . $multicheck_id,'false');    
+								}
+								else{
+								   update_option($multicheck_id,'true'); 
+								   //update_option($themename . $multicheck_id,'true'); 
+								}
+
+							}
+
+						} 
+
+						elseif($type == 'typography'){
+
+							$typography_array = array();	
+
+							/* Size */
+							$typography_array['size'] = $output[$option_array['id'] . '_size'];
+
+							/* Face  */
+							$typography_array['face'] = stripslashes($output[$option_array['id'] . '_face']);
+
+							/* Style  */
+							$typography_array['style'] = $output[$option_array['id'] . '_style'];
+
+							/* Color  */
+							$typography_array['color'] = $output[$option_array['id'] . '_color'];
+
+							update_option($id,$typography_array);
+
+
+						}
+						elseif($type == 'border'){
+
+							$border_array = array();	
+
+							/* Width */
+							$border_array['width'] = $output[$option_array['id'] . '_width'];
+
+							/* Style  */
+							$border_array['style'] = $output[$option_array['id'] . '_style'];
+
+							/* Color  */
+							$border_array['color'] = $output[$option_array['id'] . '_color'];
+
+							update_option($id,$border_array);
+
+
+						}
+						elseif($type != 'upload_min'){
+
+							update_option($id,stripslashes($new_value));
+						}
+					}
+
+			}
+		}
+
+
+		/* Create, Encrypt and Update the Saved Settings */
+		global $wpdb;
+
+		$woo_options = array();
+
+		$query = "SELECT * FROM $wpdb->options WHERE option_name LIKE 'woo_%' AND
+					option_name != 'woo_options' AND
+					option_name != 'woo_template' AND
+					option_name != 'woo_custom_template' AND
+					option_name != 'woo_settings_encode' AND
+					option_name != 'woo_export_options' AND
+					option_name != 'woo_import_options' AND
+					option_name != 'woo_framework_version' AND
+					option_name != 'woo_manual' AND 
+					option_name != 'woo_shortname'";
+
+		$results = $wpdb->get_results($query);
+
+		$output = "<ul>";
+
+		foreach ($results as $result){
+				$name = $result->option_name;
+				$value = $result->option_value;
+
+				if(is_serialized($value)) {
+
+					$value = unserialize($value);
+					$woo_array_option = $value;
+					$temp_options = '';
+					foreach($value as $v){
+						if(isset($v))
+							$temp_options .= $v . ',';
+
+					}	
+					$value = $temp_options;
+					$woo_array[$name] = $woo_array_option;
+				} else {
+					$woo_array[$name] = $value;
+				}
+
+				$output .= '<li><strong>' . $name . '</strong> - ' . $value . '</li>';
+		}
+		$output .= "</ul>";
+		$output = base64_encode($output);
+
+		update_option('woo_options',$woo_array);
+		update_option('woo_settings_encode',$output);
+
+
+
+	  die();
+
+	}	
+
 }
 ?>
