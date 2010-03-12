@@ -49,7 +49,7 @@
 		        }
 
 		        // Recurse
-		        rmdirr($dirname . DIRECTORY_SEPARATOR . $entry);
+		        $this->rmdirr($dirname . DIRECTORY_SEPARATOR . $entry);
 		    }
 
 		    // Clean up

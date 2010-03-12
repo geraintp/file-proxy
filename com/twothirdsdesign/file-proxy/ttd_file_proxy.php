@@ -54,12 +54,18 @@ class TtdFileProxy extends TtdPluginClass
 		add_shortcode('ttd-fp-url', array(&$this, 'return_proxy_url'));
 		
 		// adds proxy rewrite rule & query_var
-		add_action('generate_rewrite_rules', array(&$this,'add_rewrite_rules'));
+		add_filter('generate_rewrite_rules', array(&$this,'add_rewrite_rules'));
 		add_filter('query_vars', array(&$this, 'query_vars'));
+		add_filter('wp_redirect', array(&$this, 'test'), 0, 2);
 		
 		// intercepts and acts on query_var file-proxy
 		add_action('init', array(&$this,'request_handler'), 999);
-		//add_action('init', array(&$this,'flush_rules'));
+		
+	}
+	
+	
+	function test($location, $status){
+		echo $status . " - " . $location;
 	}
 	
 	function admin(){
@@ -112,9 +118,9 @@ class TtdFileProxy extends TtdPluginClass
 	 * @since 0.1
 	 **/
 	function add_rewrite_rules( $wp_rewrite ) {
-		$new_rules = array( $this->get_option('url-key').'/(.+)' => 'index.php?'. $this->get_option('url-key').'=1'.$wp_rewrite->preg_index(1) );
-		$wp_rewrite->rules = $new_rules + $wp_rewrite->rules;
-		//$this->rules = $wp_rewrite->rules;
+		$new_rules = array( $this->get_option('url-key').'/?(.+){1,}/?$' => 'index.php?'. $this->get_option('url-key').'='.$wp_rewrite->preg_index(1) );
+		$new_rules2 = array( 'testing/(.+)/?$' => 'index.php?file=test'.$wp_rewrite->preg_index(1) );
+		$wp_rewrite->rules = $new_rules + $new_rules2 + $wp_rewrite->rules;
 	}
 	
 	/**
@@ -221,11 +227,13 @@ class TtdFileProxy extends TtdPluginClass
 	 **/
 	public function request_handler()
 	{	
-		global $wp_query;
+		global $wp_query, $wp_rewrite;
+		$this->flush_rules();
+		$id = $_GET[ 'file'];//$this->get_option('url-key') ];
 		
-		$id = $_GET[ $this->get_option('url-key') ];
-		
+		//print_r($_GET['file']);
 		if ( isset( $id )) {
+			echo '<pre>';print_r($wp_rewrite->wp_rewrite_rules() );	echo '</pre>';
 			
 			// Sanatize url var.
 			$id = intval( $id );
@@ -237,8 +245,8 @@ class TtdFileProxy extends TtdPluginClass
 				auth_redirect();
 				exit;
 			}
-				
-			$this->return_file( $id );
+
+			//$this->return_file( $id );
 			exit;
 		}
 	}
