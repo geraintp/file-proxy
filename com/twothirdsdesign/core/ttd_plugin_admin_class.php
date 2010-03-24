@@ -19,14 +19,16 @@
 		function admin_header(){ ?>
 	        <div class="wrap" id="ttd_file_proxy_container">
 	        <div id="ttd-popup-save" class="ttd-save-popup"><div class="ttd-save-save">Options Updated</div></div>
+			<div id="ttd-popup-fail" class="ttd-save-popup"><div class="ttd-save-fail">Update Failed</div></div>
 	        <div id="ttd-popup-reset" class="ttd-save-popup"><div class="ttd-save-reset">Options Reset</div></div>
 	        <?php // <form method="post"  enctype="multipart/form-data"> ?>
-	        <form action="" enctype="multipart/form-data" id="ttdform">
+	        <form method="post" action="" enctype="multipart/form-data" id="ttdform">
+				<?php wp_nonce_field('ttd-file-proxy'); ?>
 	            <div id="header">
 	                <div class="logo"><img alt="ttdThemes" src="<?php echo TTDFP_URL ?>assets/img/plugin-logo.png"/></div>
 	                <div class="theme-info">
 	                    <span class="theme"><?php _e('File-Proxy', $this->domain) ?></span>
-	                    <span class="framework"><?php echo __('version', $this->domain) . $this->m->get_option("version", 0 ); ?></span>
+	                    <span class="framework"><?php echo __('version', $this->domain) ." ". $this->m->get_option("version", 0 ); ?></span>
 	                </div>
 	                <div class="clear"></div>
 	            </div>
@@ -36,7 +38,7 @@
 	                    <li class="changelog"><a title="<?php _e('Changelog', $this->domain) ?>" href="<?php echo $manualurl; ?>#Changelog"><?php _e('View Changelog', $this->domain) ?></a></li>
 	                    <li class="docs"><a title="<?php _e('Documentation', $this->domain) ?>" href="<?php echo $manualurl; ?>"><?php _e('View Plugin docs', $this->domain) ?></a></li>
 	                    <li class="forum"><a href="http://wordpress.org/tags/file-proxy/" target="blank"><?php _e('Visit Forum', $this->domain) ?></a></li>
-	                    <li class="right"><img style="display:none" src="<?php echo bloginfo('template_url'); ?>/functions/images/loading-top.gif" class="ajax-loading-img ajax-loading-img-top" alt="Working..." /><a href="#" id="expand_options" class='hide-if-no-js'>[+]</a> <input type="submit" value="<?php _e('Save All Changes', $this->domain) ?>" class="button submit-button" /></li>
+	                    <li class="right"><img style="display:none" src="<?php echo TTDFP_URL ?>assets/img/loading-top.gif" class="ajax-loading-img ajax-loading-img-top" alt="Working..." /><a href="#" id="expand_options" class='hide-if-no-js'>[+]</a> <input type="submit" value="<?php _e('Save All Changes', $this->domain) ?>" class="button submit-button" /></li>
 	                </ul>
 
 	            </div><?php 
@@ -51,10 +53,13 @@
 		function admin_footer(){ ?>
 				<div class="save_bar_top">
 					<img style="display:none" src="<?php echo bloginfo('template_url'); ?>/functions/images/loading-bottom.gif" class="ajax-loading-img ajax-loading-img-bottom" alt="Working..." />
-					<input type="submit" value="Save All Changes" class="button submit-button" />       
-					</form>
+					<input type="submit" value="Save All Changes" class="button submit-button" />
+					<input type="hidden" name="ttd_file_proxy_submit_hidden" value="Y" />
+					<input type="hidden" name="ttd_file_proxy_submit_nonce" value="<?php echo wp_create_nonce('ttd-file-proxy'); ?>" />       
+				</form>
 						<form action="<?php echo wp_specialchars( $_SERVER['REQUEST_URI'] ) ?>" method="post" style="display:inline" id="ttdform-reset">
 							<span class="submit-footer-reset">
+								<?php wp_nonce_field('ttd-file-proxy-reset'); ?>
 								<input name="reset" type="submit" value="Reset Options" class="button submit-button reset-button" onclick="return confirm('Click OK to reset. Any settings will be lost!');" />
 								<input type="hidden" name="ttd_file_proxy_submit_hidden" value="reset" />
 							</span>
@@ -117,6 +122,7 @@
 	                <h3 class="heading"><?php echo $title ?></h3>
 	                <div class="option"><?php	
 		}
+		
 
 		function post_field( $desc )
 		{	?>
@@ -156,8 +162,7 @@
 			$this->pre_field( $args['title'], 'text' ); ?>
 					<div class="controls"> 
 						<input class="ttd-input" name="<?php echo $args['name'] ?>" id="<?php echo $args['name'] ?>" type="text" value="<?php echo $value ?>" /><br/>
-	                </div>
-			<?php
+	                </div> <?php
 			$this->post_field( $args['description'] );
 		} 
 

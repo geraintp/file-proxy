@@ -3,7 +3,7 @@ Contributors: geraint
 Tags: files, protection, retsrict access, user, protect, in, logged, download, proxy, files, private
 Requires at least: 2.9.x
 Tested up to: 2.9.2
-Stable tag: 0.5
+Stable tag: 0.5.1
 
 File Proxy lest you protect / restrict access to a specific embedded file making sure users are logged in before they can download any files.
 

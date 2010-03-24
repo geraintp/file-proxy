@@ -138,9 +138,10 @@ border-width:1px;
 #ttd_file_proxy_container .ttd-uploaded-image img {margin:5px;display:block}
 */
 
-#ttd_file_proxy_container .ttd-save-popup { position:absolute; -moz-border-radius:12px; background:rgba(0,0,0,0.4); color:#fff; font-size:24px; text-align:center; display:none}
+#ttd_file_proxy_container .ttd-save-popup { position:absolute; -moz-border-radius:12px; -webkit-border-radius: 12px; background:rgba(0,0,0,0.4); color:#fff; font-size:24px; text-align:center; display:none}
 
 #ttd_file_proxy_container .ttd-save-save { background:url( ../img/happy.png) 20px 50% no-repeat; padding:30px 30px 30px 70px}
+#ttd_file_proxy_container .ttd-save-fail { background:url( ../img/warning.png) 20px 50% no-repeat; padding:30px 30px 30px 70px}
 #ttd_file_proxy_container .ttd-save-reset { background:url( ../img/warning.png) 20px 50% no-repeat; padding:30px 30px 30px 70px}
 
 .upload_button_div { margin-bottom: 10px;}

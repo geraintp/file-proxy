@@ -22,8 +22,9 @@ class TtdFileProxyAdmin extends TtdPluginAdminClass
 		
 		add_action( 'init', array(&$this, 'init') );
 		
-		add_action('wp_ajax_ttd_file_proxy_action', array(&$this, 'admin_ajax_commit') );	
+		add_action('wp_ajax_ttd_file_proxy', array(&$this, 'admin_ajax_commit') );	
 	}
+	
 	
 	/**
 	 * Initializes the theme administration functions. Makes sure we have a theme settings
@@ -39,6 +40,7 @@ class TtdFileProxyAdmin extends TtdPluginAdminClass
 		/* Adds file proxy button to the upload manager */
 		add_filter( 'attachment_fields_to_edit', array(&$this, 'upload_form_filter'), 999, 2 );
 	}
+	
 	
 	/**
 	 * add file proxy button to the media upload manager.
@@ -60,6 +62,7 @@ class TtdFileProxyAdmin extends TtdPluginAdminClass
 	function get_settings_link(){
 		return admin_url() . $this->menu_parent .'?page='. $this->setting_identifier ;
 	}
+
 	
 	/**
 	 * echos admin url for plugin settings.
@@ -69,6 +72,7 @@ class TtdFileProxyAdmin extends TtdPluginAdminClass
 	function settings_link(){
 		echo $this->get_settings_link();
 	}
+
 
 	/**
 	 * Initializes all the plugin settings page functions. This function is used to create the plugin 
@@ -132,9 +136,13 @@ class TtdFileProxyAdmin extends TtdPluginAdminClass
 	 */
 	function load_settings_page(){
 		global $user_level;
-
+		
 		if($user_level > 9){
 			if( "Y" == esc_attr( $_POST['ttd_file_proxy_submit_hidden'] )){
+					
+					// check for CSRF
+					check_admin_referer('ttd-file-proxy');
+					
 					//echo "<pre>"; print_r( $_POST ); echo "</pre>";
 					
 					if( $this->m->get_option( "permalinks" != "disabled" ) )
@@ -145,10 +153,14 @@ class TtdFileProxyAdmin extends TtdPluginAdminClass
 					
 					$this->m->update_option( "uninstall", isset( $_POST[ 'uninstall' ] ) ? true : false );
 					$this->m->update_option( "url-key", sanitize_title_with_dashes( strval( $_POST['url-key']) ) );
+					$this->m->update_option( "login-url", strval( $_POST['login-url'] ) );
+					$this->m->update_option( "redirect-target", esc_attr( $_POST['redirect-target'] ) );
 					
 					$this->msg = "saved";
 			}
 			else if( $_POST['ttd_file_proxy_submit_hidden'] == "reset" ){
+				// check for CFX
+				check_admin_referer('ttd-file-proxy-reset');
 				$this->reset_options();
 			}
 		}
@@ -168,7 +180,6 @@ class TtdFileProxyAdmin extends TtdPluginAdminClass
 		$this->m->update_option("login-url", get_option('siteurl') . '/wp-login.php' );	
 		wp_redirect( $this->get_settings_link() );
 	}
-
 	
 	
 	/**
@@ -177,8 +188,8 @@ class TtdFileProxyAdmin extends TtdPluginAdminClass
 	 *
 	 * @since 0.6
 	 */
-	function render_settings_page() 
-	{	
+	function render_settings_page(){	
+		
 		global $wp_rewrite;
 		
 		$url = $this->m->generate_url( 0 );
@@ -223,300 +234,45 @@ class TtdFileProxyAdmin extends TtdPluginAdminClass
 		
 		
 		$this->render_page( $panels );
-		
-		/*?>
-		<div class="wrap">
-		<div id="icon-options-general" class="icon32"><br /></div> 
-		<h2><?php  _e( 'File Proxy Settings', $this->domain ); ?> <small>(<a href="<?php $this->settings_link(); ?>&amp;opt=reset"><?php _e('Reset', $this->domain ); ?></a>)</small></h2>
-
-		<?php if ( isset($this->msg)  ) echo '<p class="updated fade below-h2" style="padding: 5px 10px;"><strong>' . __( 'Settings saved.', $this->domain ) . '</strong></p>'; ?>
-
-		<div id="poststuff">
-
-			<form method="post" action="<?php $this->settings_link(); ?>">
-
-				<?php wp_nonce_field( "ttd-file-proxy-settings-page" ); ?>
-				<?php //wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false ); ?>
-				<?php //wp_nonce_field( 'meta-box-order', 'meta-box-order-nonce', false ); ?>
-
-				<div class="metabox-holder">
-					<div class="post-box-container column-1 normal"><?php do_meta_boxes( $this->settings_page, 'normal', NULL ); ?></div>
-					<div class="post-box-container column-2 advanced"><?php do_meta_boxes( $this->settings_page, 'advanced', NULL ); ?></div>
-					<div class="post-box-container column-3 side"><?php do_meta_boxes( $this->settings_page, 'side', NULL ); ?></div>
-				</div>
-
-				<p class="submit" style="clear: both;">
-					<input type="submit" name="Submit"  class="button-primary" value="<?php _e( 'Update Settings', $this->domain); ?>" />
-					<input type="hidden" name="<?php echo "ttd_file_proxy_submit_hidden"; ?>" value="Y" />
-				</p><!-- .submit -->
-
-			</form>
-
-		</div><!-- #poststuff -->
-
-	</div><!-- .wrap --> <?php */
 	}
 
 
-
+	/**
+	 * ajax saves settings panel options
+	 *
+	 * @since 0.6
+	 */
 	function admin_ajax_commit() {
-		global $wpdb; // this is how you get access to the database
-		$themename = get_option('template') . "_";
-		//Uploads
-		if(isset($_POST['type'])){
-			if($_POST['type'] == 'upload'){
+		
+		if (!current_user_can( 'manage_options' )) die('0');
+		
+		if( isset( $_POST['type'] ) ){
 
-				$clickedID = $_POST['data']; // Acts as the name
-				$filename = $_FILES[$clickedID];
-				$override['test_form'] = false;
-				$override['action'] = 'wp_handle_upload';    
-				$uploaded_file = wp_handle_upload($filename,$override);
-
-						$upload_tracking[] = $clickedID;
-						update_option( $clickedID , $uploaded_file['url'] );
-						//update_option( $themename . $clickedID , $uploaded_file['url'] );
-				 if(!empty($uploaded_file['error'])) {echo 'Upload Error: ' . $uploaded_file['error']; }	
-				 else { echo $uploaded_file['url']; } // Is the Response
-			}
-
-
-			elseif($_POST['type'] == 'image_reset'){
-
-					$id = $_POST['data']; // Acts as the name
-					global $wpdb;
-					$query = "DELETE FROM $wpdb->options WHERE option_name LIKE '$id'";
-					$wpdb->query($query);
-					//die;
-
-			}
-			elseif($_POST['type'] == 'framework'){
-
-				$data = $_POST['data'];
-				parse_str($data,$output);
-
-				foreach($output as $id => $value){
-
-					if($id == 'woo_import_options'){
-
-						//Decode and over write options.
-						$new_import = base64_decode($value);
-						$new_import = unserialize($new_import);
-						print_r($new_import);
-
-						if(!empty($new_import)) {
-							foreach($new_import as $id2 => $value2){
-
-								if(is_serialized($value2)) {
-
-									update_option($id2,unserialize($value2));
-
-								} else {
-
-									update_option($id2,$value2);
-
-								}
-							}
-						}
-					}
-
-					// Woo Show Option Save
-					if(!isset($output['woo_show_options'])){ 
-						update_option('woo_show_options','false'); 
-					}
-					elseif ( $id == 'woo_show_options' AND $value == 'true') { update_option($id,'true'); }
-
-					// Woo Theme Version Checker Save
-					if(!isset($output['woo_theme_version_checker'])){ 
-						update_option('woo_theme_version_checker','false'); 
-					}
-					elseif ( $id == 'woo_theme_version_checker' AND $value == 'true') { update_option($id,'true'); }
-
-
-					// Woo Core update Save
-					if(!isset($output['woo_framework_update'])){ 
-						update_option('woo_framework_update','false'); 
-					}
-					elseif ( $id == 'woo_framework_update' AND $value == 'true') { update_option($id,'true'); }
-
-					// Woo Buy Themes Save
-					if(!isset($output['woo_buy_themes'])){ 
-						update_option('woo_buy_themes','false'); 
-					}
-					elseif ( $id == 'woo_buy_themes' AND $value == 'true') { update_option($id,'true'); }
-
-
-				}
-
+			switch( esc_attr( $_POST['type'] ) ){
+				case 'settings':
+					
+					$data = $_POST['data'];
+					parse_str($data,$output);
+					
+					if( $this->m->get_option( "permalinks" != "disabled" ) )
+						$this->m->update_option( "permalinks", isset( $output[ 'permalinks' ] ) ? 'on' : 'off' );
+	
+					if( $this->m->get_option( "cache" != "disabled" ) )
+						$this->m->update_option( "cache", isset( $output[ 'cache' ] ) ? 'on' : 'off' );
+					
+					$this->m->update_option( "uninstall", isset( $output[ 'uninstall' ] ) ? true : false );
+					$this->m->update_option( "url-key", strval( $output['url-key'] ) );
+					$this->m->update_option( "login-url", strval( $output['login-url'] ) );
+					$this->m->update_option("redirect-target", esc_attr( $output['redirect-target'] ) );
+					
+					
+					die('1');
+					break;
+				default:
+					die('0');
+					break;
 			}
 		}
-
-		else {
-			$data = $_POST['data'];
-			parse_str($data,$output);
-
-			print_r($output);
-
-			$options =  get_option('woo_template');
-
-			foreach($options as $option_array){
-
-
-					if(isset($option_array['id'])) { // Headings...
-
-
-						$id = $option_array['id'];
-						$old_value = get_option($id);
-						$new_value = '';
-
-						if(isset($output[$id])){
-							$new_value = $output[$option_array['id']];
-						}
-						$type = $option_array['type'];
-
-
-						if ( is_array($type)){
-									foreach($type as $array){
-										if($array['type'] == 'text'){
-											$id = $array['id'];
-											$new_value = $output[$id];
-											update_option( $id, stripslashes($new_value));
-										}
-									}                 
-						}
-						elseif($new_value == '' && $type == 'checkbox'){ // Checkbox Save
-
-							update_option($id,'false');
-							//update_option($themename . $id,'false');
-
-
-						}
-						elseif ($new_value == 'true' && $type == 'checkbox'){ // Checkbox Save
-
-							update_option($id,'true');
-							//update_option($themename . $id,'true');
-
-						}
-						elseif($type == 'multicheck'){ // Multi Check Save
-
-							$options = $option_array['options'];
-
-							foreach ($options as $options_id => $options_value){
-
-								$multicheck_id = $id . "_" . $options_id;
-
-								if(!isset($output[$multicheck_id])){
-								  update_option($multicheck_id,'false');
-								  //update_option($themename . $multicheck_id,'false');    
-								}
-								else{
-								   update_option($multicheck_id,'true'); 
-								   //update_option($themename . $multicheck_id,'true'); 
-								}
-
-							}
-
-						} 
-
-						elseif($type == 'typography'){
-
-							$typography_array = array();	
-
-							/* Size */
-							$typography_array['size'] = $output[$option_array['id'] . '_size'];
-
-							/* Face  */
-							$typography_array['face'] = stripslashes($output[$option_array['id'] . '_face']);
-
-							/* Style  */
-							$typography_array['style'] = $output[$option_array['id'] . '_style'];
-
-							/* Color  */
-							$typography_array['color'] = $output[$option_array['id'] . '_color'];
-
-							update_option($id,$typography_array);
-
-
-						}
-						elseif($type == 'border'){
-
-							$border_array = array();	
-
-							/* Width */
-							$border_array['width'] = $output[$option_array['id'] . '_width'];
-
-							/* Style  */
-							$border_array['style'] = $output[$option_array['id'] . '_style'];
-
-							/* Color  */
-							$border_array['color'] = $output[$option_array['id'] . '_color'];
-
-							update_option($id,$border_array);
-
-
-						}
-						elseif($type != 'upload_min'){
-
-							update_option($id,stripslashes($new_value));
-						}
-					}
-
-			}
-		}
-
-
-		/* Create, Encrypt and Update the Saved Settings */
-		global $wpdb;
-
-		$woo_options = array();
-
-		$query = "SELECT * FROM $wpdb->options WHERE option_name LIKE 'woo_%' AND
-					option_name != 'woo_options' AND
-					option_name != 'woo_template' AND
-					option_name != 'woo_custom_template' AND
-					option_name != 'woo_settings_encode' AND
-					option_name != 'woo_export_options' AND
-					option_name != 'woo_import_options' AND
-					option_name != 'woo_framework_version' AND
-					option_name != 'woo_manual' AND 
-					option_name != 'woo_shortname'";
-
-		$results = $wpdb->get_results($query);
-
-		$output = "<ul>";
-
-		foreach ($results as $result){
-				$name = $result->option_name;
-				$value = $result->option_value;
-
-				if(is_serialized($value)) {
-
-					$value = unserialize($value);
-					$woo_array_option = $value;
-					$temp_options = '';
-					foreach($value as $v){
-						if(isset($v))
-							$temp_options .= $v . ',';
-
-					}	
-					$value = $temp_options;
-					$woo_array[$name] = $woo_array_option;
-				} else {
-					$woo_array[$name] = $value;
-				}
-
-				$output .= '<li><strong>' . $name . '</strong> - ' . $value . '</li>';
-		}
-		$output .= "</ul>";
-		$output = base64_encode($output);
-
-		update_option('woo_options',$woo_array);
-		update_option('woo_settings_encode',$output);
-
-
-
-	  die();
-
-	}	
-
+	}
 }
 ?>
