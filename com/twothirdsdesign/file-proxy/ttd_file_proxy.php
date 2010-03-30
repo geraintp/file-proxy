@@ -34,7 +34,7 @@ class TtdFileProxy extends TtdPluginClass
 			
 		// init options manager
 		$this->options = new GcpOptions($this->options_key, $this->_options);
-		
+		 	
 		// load localisation
 		if( in_array( $pagenow, $local_pages ) )
 			$this->handle_load_domain();
@@ -54,9 +54,9 @@ class TtdFileProxy extends TtdPluginClass
 		add_shortcode('ttd-fp-url', array(&$this, 'return_proxy_url'));
 		
 		// adds proxy rewrite rule & query_var
-		add_filter('generate_rewrite_rules', array(&$this,'add_rewrite_rules'));
+		//add_filter('generate_rewrite_rules', array(&$this,'add_rewrite_rules'));
 		add_filter('query_vars', array(&$this, 'query_vars'));
-		add_filter('wp_redirect', array(&$this, 'test'), 0, 2);
+		//add_filter('wp_redirect', array(&$this, 'test'), 0, 2);
 		
 		// intercepts and acts on query_var file-proxy
 		add_action('init', array(&$this,'request_handler'), 999);
@@ -64,9 +64,9 @@ class TtdFileProxy extends TtdPluginClass
 	}
 	
 	
-	function test($location, $status){
+/*	function test($location, $status){
 		echo $status . " - " . $location;
-	}
+	}	*/
 	
 	function admin(){
 		if( is_admin() ){
@@ -119,7 +119,7 @@ class TtdFileProxy extends TtdPluginClass
 	 **/
 	function add_rewrite_rules( $wp_rewrite ) {
 		$new_rules = array( $this->get_option('url-key').'/?(.+){1,}/?$' => 'index.php?'. $this->get_option('url-key').'='.$wp_rewrite->preg_index(1) );
-		$new_rules2 = array( 'testing/(.+)/?$' => 'index.php?file=test'.$wp_rewrite->preg_index(1) );
+		//$new_rules2 = array( 'testing/(.+)/?$' => 'index.php?file=test'.$wp_rewrite->preg_index(1) );
 		$wp_rewrite->rules = $new_rules + $new_rules2 + $wp_rewrite->rules;
 	}
 	
