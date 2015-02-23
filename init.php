@@ -1,18 +1,19 @@
-<?php
+<?php defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	/*
 	Plugin Name: File Proxy	
 	Version: 0.6
 	Description: File Proxy is a simple WordPress plug that lest you protect / restrict access to a specific embedded file.  It lets you embed files from the upload directory into a post or page using a short code that restricts access to registered users.  guest users who click on the link are prompted to login before returning the file.<code>[file-proxy id='attachment_id']link text[/file-proxy]</code>.
 	Author: Geraint Palmer
-	Author URI: http://www.twothirdsdesign.co.uk/
-	Plugin URI: http://www.twothirdsdesign.co.uk/wordpress/plugin/2010/02/file-proxy/
+	Author URI: http://geraint.co/
+	Plugin URI: https://github.com/geraintp/file-proxy/
+	License: GPL2
 	*/
 	
 	/* Version check */
 	global $wp_version;
 	
-	$exit_msg= __('ttd-file-proxy requires WordPress 2.8 or newer. <a href="http://codex.wordpress.org/Upgrading_WordPress">Please update!</a>');
-	if ( version_compare( $wp_version , "2.8" , "<" ) ) exit ($exit_msg);
+	$exit_msg= __('ttd-file-proxy requires WordPress 4.1 or newer. <a href="http://codex.wordpress.org/Upgrading_WordPress">Please update!</a>');
+	if ( version_compare( $wp_version , "4.1" , "<" ) ) exit ($exit_msg);
 
 	// Plugin Variables
 	define( 'TTDPF_VERSION', "0.6" );
@@ -53,7 +54,12 @@
 		
 		require_once( TTDFP_LIB.DS.'file-proxy'.DS.'ttd_file_proxy.php' );
 		
+		add_action('init', 'init_ttd_file_proxy');
+	}
+
+	function init_ttd_file_proxy()
+	{
 		// Create Plugin Instance
-		$ttd_file_proxy = new TtdFileProxy();
+		$ttd_file_proxy = new TTDFileProxy();
 	}	
 ?>

@@ -1,1 +1,1 @@
-<?php exit("File Not Found")  ?>
+<?php defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
