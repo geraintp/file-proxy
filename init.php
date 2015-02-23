@@ -6,7 +6,7 @@
 	Author: Geraint Palmer
 	Author URI: http://geraint.co/
 	Plugin URI: https://github.com/geraintp/file-proxy/
-	License: GPL3
+	License: GPL2
 	*/
 	
 	/* Version check */

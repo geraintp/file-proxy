@@ -73,8 +73,9 @@ class TTDFileProxy extends TtdPluginClass
 			// load localisation
 			global $pagenow;
 
-			if( in_array( $pagenow, $this->local_pages ) )
-			 	$this->handle_load_domain();
+			// TODO
+			// if( in_array( $pagenow, $this->local_pages ) )
+			//  	$this->handle_load_domain();
 
 			// load Menus & Controller
 			require_once( TTDFP_ADMIN.DS.'admin.php' );

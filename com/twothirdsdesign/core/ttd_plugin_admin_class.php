@@ -34,10 +34,10 @@
 	            </div>
 	            <div id="support-links">
 
-	                <ul>
+	                <ul> <?php $manualurl="/" ?>
 	                    <li class="changelog"><a title="<?php _e('Changelog', $this->domain) ?>" href="<?php echo $manualurl; ?>#Changelog"><?php _e('View Changelog', $this->domain) ?></a></li>
 	                    <li class="docs"><a title="<?php _e('Documentation', $this->domain) ?>" href="<?php echo $manualurl; ?>"><?php _e('View Plugin docs', $this->domain) ?></a></li>
-	                    <li class="forum"><a href="http://wordpress.org/tags/file-proxy/" target="blank"><?php _e('Visit Forum', $this->domain) ?></a></li>
+	                    <li class="forum"><a href="http://github.com/geraintp/file-proxy/issues" target="blank"><?php _e('Report Bug', $this->domain) ?></a></li>
 	                    <li class="right"><img style="display:none" src="<?php echo TTDFP_URL ?>assets/img/loading-top.gif" class="ajax-loading-img ajax-loading-img-top" alt="Working..." /><a href="#" id="expand_options" class='hide-if-no-js'>[+]</a> <input type="submit" value="<?php _e('Save All Changes', $this->domain) ?>" class="button submit-button" /></li>
 	                </ul>
 
@@ -57,7 +57,7 @@
 					<input type="hidden" name="ttd_file_proxy_submit_hidden" value="Y" />
 					<input type="hidden" name="ttd_file_proxy_submit_nonce" value="<?php echo wp_create_nonce('ttd-file-proxy'); ?>" />       
 				</form>
-						<form action="<?php echo wp_specialchars( $_SERVER['REQUEST_URI'] ) ?>" method="post" style="display:inline" id="ttdform-reset">
+						<form action="<?php echo esc_html( $_SERVER['REQUEST_URI'] ) ?>" method="post" style="display:inline" id="ttdform-reset">
 							<span class="submit-footer-reset">
 								<?php wp_nonce_field('ttd-file-proxy-reset'); ?>
 								<input name="reset" type="submit" value="Reset Options" class="button submit-button reset-button" onclick="return confirm('Click OK to reset. Any settings will be lost!');" />

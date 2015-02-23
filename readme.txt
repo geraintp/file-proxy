@@ -4,8 +4,8 @@ Tags: files, protection, retsrict access, user, protect, in, logged, download, p
 Requires at least: 4.1.x
 Tested up to: 4.1
 Stable tag: 0.6
-License: GPLv3
-License URI: http://www.gnu.org/licenses/gpl-3.0.html
+License: GPLv2
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 File Proxy lest you protect / restrict access to a specific embedded file making sure users are logged in before they can download any files.
 
@@ -71,15 +71,11 @@ none
 
 == Changelog ==
 
-= 0.7 =
-* Added admin options panel
-* Added file proxy link button to media uploader.
-
 = 0.6 =
 * This version requires WordPress 4.1 or later
 * Update Compatibility with WordPress 4.1
 * Plugin Reboot.
-* Moved to http://github.com/geraintp/file-proxy 
+* Moved to http://github.com/geraintp/file-proxy  
 
 = 0.5 = 
 changed a variable name to, obscure it to avoid conflicts.

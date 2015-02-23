@@ -15,14 +15,14 @@ class TtdFileProxyAdmin extends TtdPluginAdminClass
 	
 	function __construct( $main_ref )
 	{
-		$this->m = &$main_ref;
-		$this->m->get_option("uninstall");
-		
+		$this->m = $main_ref;
+		//this does nothing
+		//$this->m->get_option("uninstall");
+	
 		$this->domain = $this->m->get_domain();
+		//$this->init();
 		
-		add_action( 'init', array(&$this, 'init') );
-		
-		add_action('wp_ajax_ttd_file_proxy', array(&$this, 'admin_ajax_commit') );	
+		add_action('wp_ajax_ttd_file_proxy', array($this, 'admin_ajax_commit') );	
 	}
 	
 	
@@ -32,13 +32,13 @@ class TtdFileProxyAdmin extends TtdPluginAdminClass
 	 *
 	 * @since 0.5
 	 */
-	function init(){
-	
+	function init(){	
 		/* Initialize the theme settings page. */
-		add_action( 'admin_menu', array(&$this, 'settings_page_init' ) );
+		add_action( 'admin_menu', array($this, 'settings_page_init' ) );
 		
 		/* Adds file proxy button to the upload manager */
-		add_filter( 'attachment_fields_to_edit', array(&$this, 'upload_form_filter'), 999, 2 );
+		// BREAKS WP4.1 ;( will have to figure that out ...
+		//add_filter( 'attachment_fields_to_edit', array( $this, 'upload_form_filter'), 999, 2 );
 	}
 	
 	
@@ -84,16 +84,16 @@ class TtdFileProxyAdmin extends TtdPluginAdminClass
 	function settings_page_init() {
 	
 		/* Create the theme settings page. */
-		$this->settings_page =  add_submenu_page( $this->menu_parent, __('File Proxy Settings' , $this->domain ), __('File Proxy', $this->domain ) , '10', $this->setting_identifier, array(&$this, 'render_settings_page') );
+		$this->settings_page =  add_submenu_page( $this->menu_parent, __('File Proxy Settings' , $this->domain ), __('File Proxy', $this->domain ) , 'edit_pages', $this->setting_identifier, array($this, 'render_settings_page') );
 		
 	
 		/* Make sure the settings are saved. */
-		add_action( "load-{$this->settings_page}", array(&$this, 'load_settings_page') );
+		add_action( "load-{$this->settings_page}", array($this, 'load_settings_page') );
 	
 		/* Load the JavaScript and stylehsheets needed for the theme settings.*/ 
-		add_action( "load-{$this->settings_page}", array(&$this, 'enqueue_script') );
-		add_action( "load-{$this->settings_page}", array(&$this, 'enqueue_style') );
-		add_action( "admin_head-{$this->settings_page}", array(&$this,'execute_scripts') );
+		add_action( "load-{$this->settings_page}", array($this, 'enqueue_script') );
+		add_action( "load-{$this->settings_page}", array($this, 'enqueue_style') );
+		add_action( "admin_head-{$this->settings_page}", array($this,'execute_scripts') );
 	}
 	
 		
@@ -137,28 +137,30 @@ class TtdFileProxyAdmin extends TtdPluginAdminClass
 	function load_settings_page(){
 		global $user_level;
 		
-		if($user_level > 9){
-			if( "Y" == esc_attr( $_POST['ttd_file_proxy_submit_hidden'] )){
-					
-					// check for CSRF
-					check_admin_referer('ttd-file-proxy');
-					
-					//echo "<pre>"; print_r( $_POST ); echo "</pre>";
-					
-					if( $this->m->get_option( "permalinks" != "disabled" ) )
-						$this->m->update_option( "permalinks", isset( $_POST[ 'permalinks' ] ) ? 'on' : 'off' );
-	
-					if( $this->m->get_option( "cache" != "disabled" ) )
-						$this->m->update_option( "cache", isset( $_POST[ 'cache' ] ) ? 'on' : 'off' );
-					
-					$this->m->update_option( "uninstall", isset( $_POST[ 'uninstall' ] ) ? true : false );
-					$this->m->update_option( "url-key", sanitize_title_with_dashes( strval( $_POST['url-key']) ) );
-					$this->m->update_option( "login-url", strval( $_POST['login-url'] ) );
-					$this->m->update_option( "redirect-target", esc_attr( $_POST['redirect-target'] ) );
-					
-					$this->msg = "saved";
+		if($user_level > 9)
+		{
+			if( isset( $_POST['ttd_file_proxy_submit_hidden'] ) AND
+				 "Y" == esc_attr( $_POST['ttd_file_proxy_submit_hidden'] ) )
+			{	
+				// check for CSRF
+				check_admin_referer('ttd-file-proxy');
+				
+				if( $this->m->get_option( "permalinks" != "disabled" ) )
+					$this->m->update_option( "permalinks", isset( $_POST[ 'permalinks' ] ) ? 'on' : 'off' );
+
+				if( $this->m->get_option( "cache" != "disabled" ) )
+					$this->m->update_option( "cache", isset( $_POST[ 'cache' ] ) ? 'on' : 'off' );
+				
+				$this->m->update_option( "uninstall", isset( $_POST[ 'uninstall' ] ) ? true : false );
+				$this->m->update_option( "url-key", sanitize_title_with_dashes( strval( $_POST['url-key']) ) );
+				$this->m->update_option( "login-url", strval( $_POST['login-url'] ) );
+				$this->m->update_option( "redirect-target", esc_attr( $_POST['redirect-target'] ) );
+				
+				$this->msg = "saved";
 			}
-			else if( $_POST['ttd_file_proxy_submit_hidden'] == "reset" ){
+			else if( isset( $_POST['ttd_file_proxy_submit_hidden'] ) AND 
+				$_POST['ttd_file_proxy_submit_hidden'] == "reset" )
+			{
 				// check for CFX
 				check_admin_referer('ttd-file-proxy-reset');
 				$this->reset_options();
