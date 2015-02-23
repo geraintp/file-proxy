@@ -3,7 +3,7 @@ Contributors: geraint
 Tags: files, protection, retsrict access, user, protect, in, logged, download, proxy, files, private
 Requires at least: 4.1.x
 Tested up to: 4.1
-Stable tag: 0.6
+Stable tag: 0.6.1
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,11 +21,7 @@ Key Features:
 
 * The true file URL is never revealed preventing hot linking.
 * Cherry pick which files you want to protect.
-* Admin Settings Panel - allowing full customisation.
 * Simple shortcode interface.
-* File-Proxy link button in media manager.
-* Display alt image for guest.
-* No htaccess hacking, required.
 
 **Contributing**
 
