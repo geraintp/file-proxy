@@ -1,4 +1,4 @@
-<?php
+<?php defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 /**
  * Options Manager Class
  *

@@ -1,4 +1,4 @@
-<?php
+<?php defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 /**
  * Ttd File Proxy - Plugin Class File
  *
@@ -6,7 +6,7 @@
  * @author Geraint Palmer 
  */
 
-class TtdFileProxy extends TtdPluginClass
+class TTDFileProxy extends TtdPluginClass
 {	
 	protected $plugin_domain = 'TtdFileProxy';
 	protected $options_key   = 'plugin:ttd:file-proxy';
@@ -24,54 +24,59 @@ class TtdFileProxy extends TtdPluginClass
 		'default-login-url'	=> '',
 		'redirect-target' 	=> 'file',
 	);
+
+	// pages where our plugin needs translation
+	protected $local_pages = array('plugins.php');
 	
 	function __construct()
 	{
 		parent::__construct();
-		
-		// pages where our plugin needs translation
-		$local_pages = array('plugins.php');
 			
 		// init options manager
 		$this->options = new GcpOptions($this->options_key, $this->_options);
-		 	
-		// load localisation
-		// $screen = get_current_screen();
-
-		// if( in_array( $screen, $local_pages ) )
-		// 	$this->handle_load_domain();
 		
-		// Add admin menu interface
+		// Add admin interfaces
 		$this->admin();
 
-		//add_action('template_redirect', array(&$this,'uri_detect'));
+		//add_action('template_redirect', array($this,'uri_detect'));
 					
 		// add activation hooks
 		register_activation_hook   ( TTDFP_PLUGIN_FILE , array($this, 'activate'  ));
 		register_deactivation_hook ( TTDFP_PLUGIN_FILE , array($this, 'deactivate'));
-		register_uninstall_hook	   ( TTDFP_PLUGIN_FILE , array("TtdFileProxy", 'uninstall'));
+		register_uninstall_hook	   ( TTDFP_PLUGIN_FILE , "TTDFileProxy::uninstall" );
 		
 		// shortcodes
 		add_shortcode('file-proxy', array($this, 'return_proxy_link'));
-		add_shortcode('ttdfp-url', array($this, 'return_proxy_url'));
+		//add_shortcode('ttdfp-url', array($this, 'return_proxy_url'));
 		
 		// adds proxy rewrite rule & query_var
-		//add_filter('generate_rewrite_rules', array(&$this,'add_rewrite_rules'));
 		add_filter('query_vars', array($this, 'query_vars'));
+		//add_filter('generate_rewrite_rules', array(&$this,'add_rewrite_rules'));
 		//add_filter('wp_redirect', array(&$this, 'test'), 0, 2);
 		
 		// intercepts and acts on query_var file-proxy
 		add_action('init', array($this,'request_handler'), 999);
 		
 	}
-	
-	
-/*	function test($location, $status){
-		echo $status . " - " . $location;
-	}	*/
-	
-	function admin(){
-		if( is_admin() ){
+
+	/**
+	 * Loads the Options Panel in the dashboard if required.
+	 *
+	 * @return void
+	 * @author Geraint Palmer
+	 * @since 0.6
+	 **/
+	function admin()
+	{
+		if( is_admin() )
+		{
+			// load localisation
+			global $pagenow;
+
+			if( in_array( $pagenow, $this->local_pages ) )
+			 	$this->handle_load_domain();
+
+			// load Menus & Controller
 			require_once( TTDFP_ADMIN.DS.'admin.php' );
 			$ttd_file_proxy_admin = new TtdFileProxyAdmin( $this );
 		}
@@ -231,26 +236,21 @@ class TtdFileProxy extends TtdPluginClass
 	{	
 		global $wp_query, $wp_rewrite;
 		$this->flush_rules();
-		$id = isset( $_GET['file'] ) ? absint( $_GET['file'] ) : null; //$this->get_option('url-key') ];
-
-		echo $id;
+		$id = isset( $_GET['file'] ) ? intval( $_GET['file'] ) : null; 
 		
-		//print_r($_GET['file']);
 		if ( isset( $id )) {
-			echo '<pre>';print_r($wp_rewrite->wp_rewrite_rules() );	echo '</pre>';
-			
+
 			// Sanatize url var.
-			$id = intval( $id );
-			if( $id <= 0 ){ return; }
+			if( $id < 0 ){ return; }
 			
-			if(!is_user_logged_in()){
-				
+			if(!is_user_logged_in())
+			{	
 				wp_redirect( $this->get_option('login-url') );
 				auth_redirect();
 				exit;
 			}
 
-			//$this->return_file( $id );
+			$this->return_file( $id );
 			exit;
 		}
 	}

@@ -1,4 +1,4 @@
-<?php
+<?php defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 require_once( TTDFP_CORE.DS.'ttd_plugin_admin_class.php' );
 /**
  * Ttd File Proxy - Admin Settings Plugin Class File

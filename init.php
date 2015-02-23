@@ -1,4 +1,4 @@
-<?php
+<?php defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	/*
 	Plugin Name: File Proxy	
 	Version: 0.6
@@ -60,6 +60,6 @@
 	function init_ttd_file_proxy()
 	{
 		// Create Plugin Instance
-		$ttd_file_proxy = new TtdFileProxy();
+		$ttd_file_proxy = new TTDFileProxy();
 	}	
 ?>

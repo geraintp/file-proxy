@@ -78,6 +78,8 @@ none
 = 0.6 =
 * This version requires WordPress 4.1 or later
 * Update Compatibility with WordPress 4.1
+* Plugin Reboot.
+* Moved to http://github.com/geraintp/file-proxy 
 
 = 0.5 = 
 changed a variable name to, obscure it to avoid conflicts.
