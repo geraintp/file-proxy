@@ -12,6 +12,8 @@ class GcpOptions
 	protected $_options = array(
 		'key'	=> 'value',
 	);
+
+	private $_optioncache = null;
 	
 	function __construct($optionsKey, $defaultArray)
 	{

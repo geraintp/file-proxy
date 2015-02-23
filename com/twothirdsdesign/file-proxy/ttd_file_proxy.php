@@ -36,8 +36,10 @@ class TtdFileProxy extends TtdPluginClass
 		$this->options = new GcpOptions($this->options_key, $this->_options);
 		 	
 		// load localisation
-		if( in_array( $pagenow, $local_pages ) )
-			$this->handle_load_domain();
+		// $screen = get_current_screen();
+
+		// if( in_array( $screen, $local_pages ) )
+		// 	$this->handle_load_domain();
 		
 		// Add admin menu interface
 		$this->admin();
@@ -45,21 +47,21 @@ class TtdFileProxy extends TtdPluginClass
 		//add_action('template_redirect', array(&$this,'uri_detect'));
 					
 		// add activation hooks
-		register_activation_hook   ( TTDFP_PLUGIN_FILE , array(&$this, 'activate'  ));
-		register_deactivation_hook ( TTDFP_PLUGIN_FILE , array(&$this, 'deactivate'));
-		register_uninstall_hook	   ( TTDFP_PLUGIN_FILE , array(&$this, 'uninstall'));
+		register_activation_hook   ( TTDFP_PLUGIN_FILE , array($this, 'activate'  ));
+		register_deactivation_hook ( TTDFP_PLUGIN_FILE , array($this, 'deactivate'));
+		register_uninstall_hook	   ( TTDFP_PLUGIN_FILE , array("TtdFileProxy", 'uninstall'));
 		
 		// shortcodes
-		add_shortcode('file-proxy', array(&$this, 'return_proxy_link'));
-		add_shortcode('ttd-fp-url', array(&$this, 'return_proxy_url'));
+		add_shortcode('file-proxy', array($this, 'return_proxy_link'));
+		add_shortcode('ttdfp-url', array($this, 'return_proxy_url'));
 		
 		// adds proxy rewrite rule & query_var
 		//add_filter('generate_rewrite_rules', array(&$this,'add_rewrite_rules'));
-		add_filter('query_vars', array(&$this, 'query_vars'));
+		add_filter('query_vars', array($this, 'query_vars'));
 		//add_filter('wp_redirect', array(&$this, 'test'), 0, 2);
 		
 		// intercepts and acts on query_var file-proxy
-		add_action('init', array(&$this,'request_handler'), 999);
+		add_action('init', array($this,'request_handler'), 999);
 		
 	}
 	
@@ -71,7 +73,7 @@ class TtdFileProxy extends TtdPluginClass
 	function admin(){
 		if( is_admin() ){
 			require_once( TTDFP_ADMIN.DS.'admin.php' );
-			$ttd_file_proxy_admin = new TtdFileProxyAdmin( &$this );
+			$ttd_file_proxy_admin = new TtdFileProxyAdmin( $this );
 		}
 	}
 	
@@ -95,7 +97,7 @@ class TtdFileProxy extends TtdPluginClass
 	 * @since 0.5
 	 **/
 	function get_domain(){
-		return $this->domain;
+		return $this->plugin_domain;
 	}
 	
 	/**
@@ -197,15 +199,15 @@ class TtdFileProxy extends TtdPluginClass
 	
 
 	
-	public function uninstall(){
-		if( (boolean)$this->get_option("uninstall") ){
-			delete_option($this->options_key);
+	public static function uninstall(){
+		// if( (boolean)$this->get_option("uninstall") ){
+		// 	delete_option($this->options_key);
 			
-			if( is_dir( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain ) && is_writable( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain ) )
-				$this->rmdirr(WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain );
-			if( is_dir( TTDFP_DIR.DS.'cache' ) && is_writable( TTDFP_DIR.DS. $this->plugin_domain ) )
-				$this->rmdirr( TTDFP_DIR.DS.'cache' );
-		}	
+		// 	if( is_dir( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain ) && is_writable( WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain ) )
+		// 		$this->rmdirr(WP_CONTENT_DIR.DS.'cache'.DS. $this->plugin_domain );
+		// 	if( is_dir( TTDFP_DIR.DS.'cache' ) && is_writable( TTDFP_DIR.DS. $this->plugin_domain ) )
+		// 		$this->rmdirr( TTDFP_DIR.DS.'cache' );
+		// }	
 	}
 	
 	/**
@@ -229,7 +231,9 @@ class TtdFileProxy extends TtdPluginClass
 	{	
 		global $wp_query, $wp_rewrite;
 		$this->flush_rules();
-		$id = $_GET[ 'file'];//$this->get_option('url-key') ];
+		$id = isset( $_GET['file'] ) ? absint( $_GET['file'] ) : null; //$this->get_option('url-key') ];
+
+		echo $id;
 		
 		//print_r($_GET['file']);
 		if ( isset( $id )) {
