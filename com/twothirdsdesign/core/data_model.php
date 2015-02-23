@@ -1,5 +1,5 @@
-<?php
-/**
+<?php defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+/** 
  * Pretend this is a file
  *
  * @package 	com.twothirdsdesign
